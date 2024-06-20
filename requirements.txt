@@ -1,0 +1,6 @@
+streamlit
+gspread
+google-auth
+pandas
+bcrypt
+streamlit-cookies-manager
