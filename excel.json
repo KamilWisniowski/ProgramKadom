@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "disco-aegis-426716-n9",
+  "private_key_id": "65c4f4c6398bc7c1afe2e5f58801710754221f06",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCPHILbQa/hinDN\ns78M63T4vl3elb3Usf/wDjjzwYOui/o/GruL+MK7jKeULiTV+3rQTp4QACU4RB9T\n2+g/MH/9pZGA9etN08H042/OGz0TJNm2t0rkkMq35qpvXC0VyQYCYyp8GPmtauYr\nTKerj12VZuWM2n37xdOXs2T4B3J9yZLXCZYKeY6II9OTqv0rlisLz0yttO5hR/Vo\n2FZKKuVV/FTr9JgyWuh84ThIkPanIR9FTkqtKN3rm89ieql+ghK6O3O+It6KHS4A\nVtK8DjcCyLZY36WX9MfF0rh+BmItVOwbyGPUk+0Xaw2TuPC+wAdHR0iEOQrGAE3x\nmmB7DrUfAgMBAAECggEALfyv8gvoHDYz7G3jqR+qbVoi6Ok+YHA4eafgVjfrfDXf\n2tJYzPBJhyH6Iaw4SwiuHOz+bs7VJwEA/h4OwetwXY4MNSARFmfDDlHddiIbnKC9\nUzEQIGWEttapEvLQTA1WYIMEPm96H+dXgjd2M7N0k5NGlV4KmNKnnTpY6jjeahvW\nj5+sAjNMNcvk9xgwa0NOpA6lSN6TIC5NE022THQovwJ9qFkbhQFF5NtNn1glDYo2\nebR6XkSN+bsMa2NXIKqFD1NTYkh5yhkEMPYbX+cuLVJCNsMdm/CCbRqQAnrleCks\nxSpJtPZikqcAXboT/WkBM+9bLAFdH5y1DK4F8fM3aQKBgQC/g02bXVHIkCHpBQ59\nybImdcDCRmBAyGblY3pyQCsfQECxvf30hXuVV7ujEmMowOhfDn3oyc2gqUPnGamm\nTXJ3gvdZAjRQ2/z7kpVV3QC6l8sc2Ol3QGAmRtgZOku78AWfMOS0Et66nJyuXCw9\n0fnzwdjUV7zuwy+4zJ7wDzHuSQKBgQC/TOyQtSy0JAwqqwrbIXFWzI+b+AtDBaoV\ndBSWsbwTCu3v4tX+9avZ7fyFIJ3wWnRW62eUB10PSzFUD4QNa74PlmT75Jbjqjz6\nnVS2JPL/PbwHj3HF4nfJROjlsjRLoLIcky7TFcvJ60wTx6qIhMqEldEr8b2Gimra\nVPedU3goJwKBgQCFhkmMojLMMFnEOodRAlhYYk8j5KdlY5QCKSqND9pA7q5sfnfa\njVqN1F55ou9J0b3x0IvOyyy38Gvsa8MRtPuzAbfs8hGBsu+egyPlerHwZrbxhPa5\n80NWTJyMck2tWfrBc/hw6Jsr5teC5bbe31BzOFsyKX4LxkC2isvhueZpKQKBgAzj\nIsCw490S3Jr3QNj4TMlbKIWKVT/jnsypMEXinVfvEY5qip4NcNFSngNd6iXqAhJk\n82pegJ9qIl2WWgAJdRlZuV3azWty6X68oJtQq+oT/5nGyRRaqFUvxjzLH4jEv5r7\nM1lXC46DwnFGry9ZOsdpzFiYhXsN0hr5RGEd4WdbAoGBAL9gf8WuDJ+WOtQzsThe\n6sFItVUeerK1Rigl5207n4IrkwhYUlNwq3VJE5+OCzZ0QnswWGfJiyGrMjYP3luL\nk7BH9QlRjWYOd3wKqZmRi0CJZOeekTglfhJfJcykRBicedNJr1p80vC62LnmouTL\nZpovm66TT81OlfM8OUO6lsxq\n-----END PRIVATE KEY-----\n",
+  "client_email": "biurotlumaczen@disco-aegis-426716-n9.iam.gserviceaccount.com",
+  "client_id": "117708832569510602524",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/biurotlumaczen%40disco-aegis-426716-n9.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
