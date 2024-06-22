@@ -1,31 +1,20 @@
 import streamlit as st
 from datetime import datetime
-from google.oauth2.service_account import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import pickle
 from pathlib import Path
 import bcrypt
 import pandas as pd
-from streamlit_cookies_manager import EncryptedCookieManager
 
-st.set_page_config(layout="wide")
-
-# Initialize Cookie Manager
-cookies = EncryptedCookieManager(
-    prefix="myapp", 
-    password="my_secret_password"
-)
-if not cookies.ready():
-    st.stop()
-
-# Function to load hashed passwords
+# Funkcja do załadowania zaszyfrowanych haseł
 def load_hashed_passwords():
     file_path = Path(__file__).parent / "hashed_pw.pkl"
     with file_path.open("rb") as file:
         hashed_passwords = pickle.load(file)
     return hashed_passwords
 
-# Function to verify password
+# Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
@@ -37,7 +26,7 @@ SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
 
 # Authenticate and initialize the Google Sheets client
-credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+credentials = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, SCOPES)
 client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
@@ -49,11 +38,6 @@ def fetch_clients():
     for row in rows:
         clients.append(f"{row[1]} {row[0]} {row[3]}")
     return clients
-
-# Fetch all clients as DataFrame
-def fetch_clients_df():
-    rows = sheet1.get_all_values()
-    return pd.DataFrame(rows[1:], columns=rows[0])
 
 # Function to check if the client already exists
 def client_exists(first_name, last_name, phone):
@@ -154,23 +138,10 @@ def main():
                 st.sidebar.success("Zalogowano pomyślnie")
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
-                cookies.set("logged_in", True)
-                cookies.set("username", username)
             else:
                 st.sidebar.error("Błędne hasło")
         else:
             st.sidebar.error("Błędna nazwa użytkownika")
-
-    if st.sidebar.button("Wyloguj się"):
-        st.session_state["logged_in"] = False
-        st.session_state["username"] = None
-        cookies.delete("logged_in")
-        cookies.delete("username")
-        st.sidebar.info("Wylogowano")
-
-    if cookies.get("logged_in") and not st.session_state.get("logged_in"):
-        st.session_state["logged_in"] = cookies.get("logged_in")
-        st.session_state["username"] = cookies.get("username")
 
     if st.session_state.get("logged_in"):
         menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel"]
@@ -196,11 +167,6 @@ def main():
 
             if submit_button:
                 add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, tax_id, spouse_tax_id)
-            
-            # Display table of all clients
-            clients_df = fetch_clients_df()
-            st.subheader("Lista Klientów")
-            st.dataframe(clients_df)
 
         elif choice == "Dodaj usługę":
             st.subheader("Dodaj nową usługę")
@@ -236,35 +202,74 @@ def main():
         elif choice == "Podsumowanie":
             st.subheader("Podsumowanie")
 
-            services_df = fetch_full_status_data()
+            # Pobieranie danych
+            total_clients = len(sheet1.get_all_values()) - 1  # Excluding header row
+            services_data = fetch_services_data()
+            total_services = len(services_data)
 
-            # Change background colors based on status
-            def highlight_rows(row):
-                color = 'white'
-                if row['Status DE'] == 'DE - Otrzymano dokumenty':
-                    color = 'lightgreen'
-                elif row['Status DE'] == 'DE - Niekompletny zestaw':
-                    color = 'lightcoral'
-                return ['background-color: {}'.format(color)] * len(row)
+            # Filtracja danych
+            incomplete_services = [s for s in services_data if s[1] == "DE - Niekompletny zestaw"]
+            processed_services = [s for s in services_data if s[1] == "DE - Rozliczono"]
+            received_docs_services = [s for s in services_data if s[1] == "DE - Otrzymano dokumenty"]
 
-            styled_df = services_df.style.apply(highlight_rows, axis=1)
-            st.dataframe(styled_df)
+            uninformed_or_unsent = [s for s in services_data if s[6] == "Nie" or s[7] == "Nie"]
+            downpayment_services = [s for s in services_data if s[16] == "Zaliczka"]
 
-            # Clients to inform or send
-            
-            inform_or_send_df = services_df[(services_df['Poinf'] == 'Nie') | (services_df['Wysł'] == 'Nie')]
-            st.subheader("Klienci do poinformowania lub wysłania")
-            st.dataframe(inform_or_send_df)
-            styled_df = services_df.style.apply(highlight_rows)
+            # Wyświetlanie podsumowania
+            summary_data = {
+                "Liczba klientów": [total_clients],
+                "Liczba zamówionych usług": [total_services],
+                "Liczba usług z status 'DE - Niekompletny zestaw'": [len(incomplete_services)],
+                "Liczba usług z status 'DE - Rozliczono'": [len(processed_services)],
+                "Liczba usług z status 'DE - Otrzymano dokumenty'": [len(received_docs_services)]
+            }
+            summary_df = pd.DataFrame(summary_data)
+            st.dataframe(summary_df)
 
-            # Clients with advance payment
-            advance_payment_df = services_df[services_df['Status płatności'] == 'Zaliczka']
-            st.subheader("Klienci z zaliczką")
-            st.dataframe(advance_payment_df)
+            st.subheader("Klienci z usługami 'DE - Otrzymano dokumenty'")
+            if received_docs_services:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                num_columns = len(received_docs_services[0])
+                received_docs_df = pd.DataFrame(received_docs_services, columns=[f"Column{i+1}" for i in range(num_columns)])
+                st.dataframe(received_docs_df)
+
+            st.subheader("Klienci z usługami 'DE - Niekompletny zestaw'")
+            if incomplete_services:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                num_columns = len(incomplete_services[0])
+                incomplete_services_df = pd.DataFrame(incomplete_services, columns=[f"Column{i+1}" for i in range(num_columns)])
+                st.dataframe(incomplete_services_df)
+
+            st.subheader("Osoby, które mają 'Nie' w polach Poinformowany lub Wysłane")
+            if uninformed_or_unsent:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                num_columns = len(uninformed_or_unsent[0])
+                uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent, columns=[f"Column{i+1}" for i in range(num_columns)])
+                uninformed_or_unsent_df_filtered = uninformed_or_unsent_df[[0, 2, 3, 5, 6, 7]]
+                uninformed_or_unsent_df_filtered.columns = ["Klient", "Rok", "Zwrot", "Uwagi", "Poinformowany", "Wysłane"]
+                st.dataframe(uninformed_or_unsent_df_filtered)
+
+            st.subheader("Klienci z usługami 'Zaliczka'")
+            if downpayment_services:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                num_columns = len(downpayment_services[0])
+                downpayment_services_df = pd.DataFrame(downpayment_services, columns=[f"Column{i+1}" for i in range(num_columns)])
+                downpayment_services_df_filtered = downpayment_services_df[[0, 1, 2, 15, 16, 17, 18, 19]]
+                downpayment_services_df_filtered.columns = ["Klient", "Status DE", "Rok", "Cena", "Status", "Zapłacono", "Metoda płatności", "Data"]
+                st.dataframe(downpayment_services_df_filtered)
 
         elif choice == "Cały excel":
-            services_df = fetch_full_status_data()
-            st.dataframe(services_df)
+            st.subheader("Cały arkusz ZP status")
+            df = fetch_full_status_data()
+            df_unique = make_unique_columns(df)  # Ensure unique column names
+            edited_df = st.data_editor(df_unique)
+
+            if st.button("Zapisz zmiany"):
+                update_status_data(edited_df)
+                st.success("Dane zostały zaktualizowane")
+
+    else:
+        st.info("Proszę się zalogować")
 
 if __name__ == "__main__":
     main()
