@@ -1,11 +1,12 @@
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import pickle
 from pathlib import Path
 import bcrypt
 import pandas as pd
+from streamlit_cookie_manager import CookieManager
 
 # Funkcja do załadowania zaszyfrowanych haseł
 def load_hashed_passwords():
@@ -17,6 +18,11 @@ def load_hashed_passwords():
 # Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
+
+# Funkcja do zarządzania ciasteczkami
+def manage_cookies():
+    cookie_manager = CookieManager()
+    return cookie_manager
 
 # Google Sheets authentication
 SERVICE_ACCOUNT_FILE = 'excel.json'
@@ -125,9 +131,10 @@ def make_unique_columns(df):
 def main():
     st.title("System Zarządzania Klientami")
 
-    # Opcja logowania
+    cookie_manager = manage_cookies()
     hashed_passwords = load_hashed_passwords()
     usernames = ["kkamil", "bbeata"]  # Lista nazw użytkowników
+
     username = st.sidebar.text_input("Nazwa użytkownika")
     password = st.sidebar.text_input("Hasło", type="password")
 
@@ -138,10 +145,17 @@ def main():
                 st.sidebar.success("Zalogowano pomyślnie")
                 st.session_state["logged_in"] = True
                 st.session_state["username"] = username
+                cookie_manager.set("username", username, expires_at=datetime.now() + timedelta(days=30))
+                cookie_manager.set("password", password, expires_at=datetime.now() + timedelta(days=30))
             else:
                 st.sidebar.error("Błędne hasło")
         else:
             st.sidebar.error("Błędna nazwa użytkownika")
+
+    if "username" not in st.session_state:
+        if "username" in cookie_manager.get_all():
+            st.session_state["username"] = cookie_manager.get("username")
+            st.session_state["logged_in"] = True
 
     if st.session_state.get("logged_in"):
         menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel"]
@@ -239,24 +253,6 @@ def main():
                 num_columns = len(incomplete_services[0])
                 incomplete_services_df = pd.DataFrame(incomplete_services, columns=[f"Column{i+1}" for i in range(num_columns)])
                 st.dataframe(incomplete_services_df)
-
-            st.subheader("Osoby, które mają 'Nie' w polach Poinformowany lub Wysłane")
-            if uninformed_or_unsent:
-                # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(uninformed_or_unsent[0])
-                uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent, columns=[f"Column{i+1}" for i in range(num_columns)])
-                uninformed_or_unsent_df_filtered = uninformed_or_unsent_df[[0, 2, 3, 5, 6, 7]]
-                uninformed_or_unsent_df_filtered.columns = ["Klient", "Rok", "Zwrot", "Uwagi", "Poinformowany", "Wysłane"]
-                st.dataframe(uninformed_or_unsent_df_filtered)
-
-            st.subheader("Klienci z usługami 'Zaliczka'")
-            if downpayment_services:
-                # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(downpayment_services[0])
-                downpayment_services_df = pd.DataFrame(downpayment_services, columns=[f"Column{i+1}" for i in range(num_columns)])
-                downpayment_services_df_filtered = downpayment_services_df[[0, 1, 2, 15, 16, 17, 18, 19]]
-                downpayment_services_df_filtered.columns = ["Klient", "Status DE", "Rok", "Cena", "Status", "Zapłacono", "Metoda płatności", "Data"]
-                st.dataframe(downpayment_services_df_filtered)
 
         elif choice == "Cały excel":
             st.subheader("Cały arkusz ZP status")
