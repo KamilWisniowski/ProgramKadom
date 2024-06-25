@@ -7,6 +7,7 @@ from pathlib import Path
 import bcrypt
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
+st.set_page_config(layout="wide")
 
 # Inicjalizacja managera ciasteczek
 cookies = EncryptedCookieManager(
@@ -41,7 +42,6 @@ client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
 
-# Fetch all clients
 @st.cache_data
 def fetch_clients():
     clients = []
@@ -59,7 +59,7 @@ def client_exists(first_name, last_name, phone):
     return False
 
 # Function to add a new client to the Google Sheet
-def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, tax_id, spouse_tax_id):
+def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id):
     if client_exists(first_name, last_name, phone):
         st.error("Taki klient już istnieje")
         return
@@ -74,6 +74,7 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
         bank_account,
         swift,
         tax_office,
+        steuernummer,
         tax_id,
         spouse_tax_id
     ]
@@ -177,6 +178,7 @@ def main():
                 bank_account = st.text_input("Nr konta bank")
                 swift = st.text_input("SWIFT")
                 tax_office = st.text_input("Finanzamt")
+                steuernummer = st.text_input("steuernummer")
                 tax_id = st.text_input("Nr ID")
                 spouse_tax_id = st.text_input("Nr ID małżonka")
 
@@ -192,13 +194,13 @@ def main():
 
             with st.form(key="add_service_form"):
                 client = st.selectbox("Klient", all_clients)
-                status_de = st.selectbox("Status DE", ["DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"])
-                year = st.selectbox("Rok", [str(year) for year in range(2019, datetime.now().year)])
+                status_de = st.selectbox("Status DE", ["","DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"])
+                year = st.selectbox("Rok", [2023,2022,2021,2020,2019,2018])
                 refund = st.text_input("Zwrot")
                 guardian = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"])
                 remarks = st.text_area("Uwagi")
-                informed = st.selectbox("Poinformowany", ["Tak", "Nie"])
-                sent = st.selectbox("Wysłane", ["Tak", "Nie"])
+                informed = st.selectbox("Poinformowany", ["Nie","Tak"])
+                sent = st.selectbox("Wysłane", ["Nie","Tak"])
                 fahrkosten = st.text_input("Fahrkosten")
                 ubernachtung = st.text_input("Übernachtung")
                 entry_24h = st.text_input("24h")
@@ -206,10 +208,10 @@ def main():
                 entry_kabine = st.text_input("Kabine")
                 entry_ab_und_an = st.text_input("Ab und an")
                 children = st.text_area("Dzieci")
-                price = st.selectbox("Cena", ["250", "400"])
-                status = st.selectbox("Status", ["Opłacony", "Nieopłacony"])
+                price = st.selectbox("Cena", ["","250", "400"])
+                status = st.selectbox("Status", ["Nieopłacony","Opłacony", "Zaliczka"])
                 zapl = st.text_input("Zapłacono")
-                payment_method = st.selectbox("Metoda płatności", ["Przelew", "Gotówka"])
+                payment_method = st.selectbox("Metoda płatności", ["","Przelew", "Gotówka"])
 
                 submit_button = st.form_submit_button(label="Dodaj usługę")
 
@@ -256,6 +258,44 @@ def main():
                 num_columns = len(incomplete_services[0])
                 incomplete_services_df = pd.DataFrame(incomplete_services, columns=[f"Column{i+1}" for i in range(num_columns)])
                 st.dataframe(incomplete_services_df)
+
+            st.subheader("Klienci do wysłania")
+            if uninformed_or_unsent:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                selected_columns = [0, 1, 2, 6, 7, 5]  # Indeksy kolumn 1, 2, 3, 5, 7
+                uninformed_or_unsent_filtered = [[row[i] for i in selected_columns] for row in uninformed_or_unsent]
+                uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Poinformowany", "Wysłany", "UWAGI"])
+                
+            def highlight_status(row):
+                styles = ['' for _ in row]
+                
+                # Highlight the entire row based on "Status" column
+                if row['Status'] == "DE - Niekompletny zestaw":
+                    styles = ['background-color: lightcoral' for _ in row]
+                elif row['Status'] == "DE - Rozliczono":
+                    styles = ['background-color: yellow' for _ in row]
+                elif row['Status'] == "DE - Otrzymano dokumenty":
+                    styles = ['background-color: lightgreen' for _ in row]
+                
+                # Highlight specific cells in "Poinformowany" and "Wysłany" columns
+                if row['Poinformowany'] == "Nie":
+                    styles[3] = 'background-color: red; color: white;'
+                if row['Wysłany'] == "Nie":
+                    styles[4] = 'background-color: red; color: white;'
+                
+                return styles
+
+            uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
+            st.dataframe(uninformed_or_unsent_styled)
+            
+            st.subheader("Klienci z zaliczką")
+            if downpayment_services:
+                # Upewnij się, że liczba kolumn pasuje do danych
+                selected_columns = [0, 15,16, 17, 18, 19,5, 20]  # Indeksy kolumn 1, 2, 3, 5, 7
+                downpayment_services_filtered = [[row[i] for i in selected_columns] for row in downpayment_services]
+                downpayment_services_df = pd.DataFrame(downpayment_services_filtered, columns=["Imię i Nazwisko","Cena", "Status płatności", "Zapłacono", "Forma zapłaty", "Nr. faktury", "Uwagi","Data wystawienia faktury"])
+            st.dataframe(downpayment_services_df)
+                
 
         elif choice == "Cały excel":
             st.subheader("Cały arkusz ZP status")
