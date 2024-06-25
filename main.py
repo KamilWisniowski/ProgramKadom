@@ -1,12 +1,11 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import pickle
 from pathlib import Path
 import bcrypt
 import pandas as pd
-from streamlit_cookie_manager import CookieManager
 
 # Funkcja do załadowania zaszyfrowanych haseł
 def load_hashed_passwords():
@@ -18,11 +17,6 @@ def load_hashed_passwords():
 # Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
-
-# Funkcja do zarządzania ciasteczkami
-def manage_cookies():
-    cookie_manager = CookieManager()
-    return cookie_manager
 
 # Google Sheets authentication
 SERVICE_ACCOUNT_FILE = 'excel.json'
@@ -131,33 +125,28 @@ def make_unique_columns(df):
 def main():
     st.title("System Zarządzania Klientami")
 
-    cookie_manager = manage_cookies()
+    # Opcja logowania
     hashed_passwords = load_hashed_passwords()
     usernames = ["kkamil", "bbeata"]  # Lista nazw użytkowników
-
     username = st.sidebar.text_input("Nazwa użytkownika")
     password = st.sidebar.text_input("Hasło", type="password")
+
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
 
     if st.sidebar.button("Zaloguj się"):
         if username in usernames:
             user_index = usernames.index(username)
             if verify_password(hashed_passwords[user_index], password):
                 st.sidebar.success("Zalogowano pomyślnie")
-                st.session_state["logged_in"] = True
-                st.session_state["username"] = username
-                cookie_manager.set("username", username, expires_at=datetime.now() + timedelta(days=30))
-                cookie_manager.set("password", password, expires_at=datetime.now() + timedelta(days=30))
+                st.session_state.logged_in = True
+                st.session_state.username = username
             else:
                 st.sidebar.error("Błędne hasło")
         else:
             st.sidebar.error("Błędna nazwa użytkownika")
 
-    if "username" not in st.session_state:
-        if "username" in cookie_manager.get_all():
-            st.session_state["username"] = cookie_manager.get("username")
-            st.session_state["logged_in"] = True
-
-    if st.session_state.get("logged_in"):
+    if st.session_state.logged_in:
         menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel"]
         choice = st.sidebar.selectbox("Menu", menu)
 
