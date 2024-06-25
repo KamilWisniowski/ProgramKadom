@@ -3,3 +3,4 @@ gspread
 google-auth
 pandas
 bcrypt
+oauth2client.service_account
