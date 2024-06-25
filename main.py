@@ -6,6 +6,19 @@ import pickle
 from pathlib import Path
 import bcrypt
 import pandas as pd
+from streamlit_cookies_manager import EncryptedCookieManager
+
+# Ustawienie szerokiego wyświetlania okna
+st.set_page_config(layout="wide")
+
+# Inicjalizacja managera ciasteczek
+cookies = EncryptedCookieManager(
+    prefix="my_prefix",  # Zmień prefix na unikalny dla swojej aplikacji
+    password="super_secret_password"  # Użyj silnego hasła do szyfrowania ciasteczek
+)
+
+if not cookies.ready():
+    st.stop()
 
 # Funkcja do załadowania zaszyfrowanych haseł
 def load_hashed_passwords():
@@ -32,6 +45,7 @@ sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
 
 # Fetch all clients
+@st.cache_data
 def fetch_clients():
     clients = []
     rows = sheet1.get_all_values()[1:]  # Skip header row
@@ -97,11 +111,13 @@ def add_service(client, status_de, year, refund, guardian, remarks, informed, se
     st.success("Nowa usługa została dodana")
 
 # Function to fetch and filter services data
+@st.cache_data
 def fetch_services_data():
     rows = sheet2.get_all_values()[1:]  # Skip header row
     return rows
 
 # Function to fetch the entire ZP status sheet data
+@st.cache_data
 def fetch_full_status_data():
     rows = sheet2.get_all_values()  # Include header row
     return pd.DataFrame(rows[1:], columns=rows[0])
@@ -131,26 +147,39 @@ def main():
     username = st.sidebar.text_input("Nazwa użytkownika")
     password = st.sidebar.text_input("Hasło", type="password")
 
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
+    if "logged_in" not in cookies:
+        cookies["logged_in"] = "False"
 
     if st.sidebar.button("Zaloguj się"):
         if username in usernames:
             user_index = usernames.index(username)
             if verify_password(hashed_passwords[user_index], password):
                 st.sidebar.success("Zalogowano pomyślnie")
-                st.session_state.logged_in = True
-                st.session_state.username = username
+                cookies["logged_in"] = "True"
+                cookies["username"] = username
+                cookies.save()
             else:
                 st.sidebar.error("Błędne hasło")
         else:
             st.sidebar.error("Błędna nazwa użytkownika")
 
-    if st.session_state.logged_in:
-        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel"]
-        choice = st.sidebar.selectbox("Menu", menu)
+    if cookies.get("logged_in") == "True":
+        st.sidebar.header("Menu")
+        if st.sidebar.button("Dodaj klienta"):
+            st.session_state.page = "Dodaj klienta"
+        if st.sidebar.button("Dodaj usługę"):
+            st.session_state.page = "Dodaj usługę"
+        if st.sidebar.button("Podsumowanie"):
+            st.session_state.page = "Podsumowanie"
+        if st.sidebar.button("Cały excel"):
+            st.session_state.page = "Cały excel"
+        if st.sidebar.button("Wyloguj"):
+            cookies["logged_in"] = "False"
+            cookies["username"] = ""
+            cookies.save()
+            st.experimental_rerun()
 
-        if choice == "Dodaj klienta":
+        if st.session_state.get("page") == "Dodaj klienta":
             st.subheader("Dodaj nowego klienta")
 
             with st.form(key="add_client_form"):
@@ -171,7 +200,7 @@ def main():
             if submit_button:
                 add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, tax_id, spouse_tax_id)
 
-        elif choice == "Dodaj usługę":
+        elif st.session_state.get("page") == "Dodaj usługę":
             st.subheader("Dodaj nową usługę")
 
             all_clients = fetch_clients()
@@ -202,59 +231,19 @@ def main():
             if submit_button:
                 add_service(client, status_de, year, refund, guardian, remarks, informed, sent, fahrkosten, ubernachtung, entry_24h, entry_8h, entry_kabine, entry_ab_und_an, children, price, status, zapl, payment_method)
 
-        elif choice == "Podsumowanie":
+        elif st.session_state.get("page") == "Podsumowanie":
             st.subheader("Podsumowanie")
+            all_services = fetch_services_data()
+            df_services = pd.DataFrame(all_services, columns=["Klient", "Status DE", "Rok", "Zwrot", "Opiekun", "Uwagi", "Poinformowany", "Wysłane", "Fahrkosten", "Übernachtung", "24h", "8h", "Kabine", "Ab und an", "Dzieci", "Cena", "Status", "Zapłacono", "Metoda płatności", "Data"])
+            
+            df_to_send = df_services[(df_services["Poinformowany"] == "Nie") | (df_services["Wysłane"] == "Nie")]
+            st.subheader("Klienci do wysłania")
+            st.dataframe(df_to_send)
 
-            # Pobieranie danych
-            total_clients = len(sheet1.get_all_values()) - 1  # Excluding header row
-            services_data = fetch_services_data()
-            total_services = len(services_data)
-
-            # Filtracja danych
-            incomplete_services = [s for s in services_data if s[1] == "DE - Niekompletny zestaw"]
-            processed_services = [s for s in services_data if s[1] == "DE - Rozliczono"]
-            received_docs_services = [s for s in services_data if s[1] == "DE - Otrzymano dokumenty"]
-
-            uninformed_or_unsent = [s for s in services_data if s[6] == "Nie" or s[7] == "Nie"]
-            downpayment_services = [s for s in services_data if s[16] == "Zaliczka"]
-
-            # Wyświetlanie podsumowania
-            summary_data = {
-                "Liczba klientów": [total_clients],
-                "Liczba zamówionych usług": [total_services],
-                "Liczba usług z status 'DE - Niekompletny zestaw'": [len(incomplete_services)],
-                "Liczba usług z status 'DE - Rozliczono'": [len(processed_services)],
-                "Liczba usług z status 'DE - Otrzymano dokumenty'": [len(received_docs_services)]
-            }
-            summary_df = pd.DataFrame(summary_data)
-            st.dataframe(summary_df)
-
-            st.subheader("Klienci z usługami 'DE - Otrzymano dokumenty'")
-            if received_docs_services:
-                # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(received_docs_services[0])
-                received_docs_df = pd.DataFrame(received_docs_services, columns=[f"Column{i+1}" for i in range(num_columns)])
-                st.dataframe(received_docs_df)
-
-            st.subheader("Klienci z usługami 'DE - Niekompletny zestaw'")
-            if incomplete_services:
-                # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(incomplete_services[0])
-                incomplete_services_df = pd.DataFrame(incomplete_services, columns=[f"Column{i+1}" for i in range(num_columns)])
-                st.dataframe(incomplete_services_df)
-
-        elif choice == "Cały excel":
-            st.subheader("Cały arkusz ZP status")
-            df = fetch_full_status_data()
-            df_unique = make_unique_columns(df)  # Ensure unique column names
-            edited_df = st.data_editor(df_unique)
-
-            if st.button("Zapisz zmiany"):
-                update_status_data(edited_df)
-                st.success("Dane zostały zaktualizowane")
-
-    else:
-        st.info("Proszę się zalogować")
+        elif st.session_state.get("page") == "Cały excel":
+            st.subheader("Cały excel")
+            full_status_data = fetch_full_status_data()
+            st.dataframe(full_status_data)
 
 if __name__ == "__main__":
     main()
