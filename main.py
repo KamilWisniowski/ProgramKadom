@@ -228,28 +228,32 @@ def main():
             # Przycisk do czyszczenia formularza
             if st.button("Wyczyść"):
                 reset_client_form()
+            with st.form(key="form0"):
+                office = st.selectbox("Biuro", ["Przeworsk", "Jarosław"], key="office")
+                first_name = st.text_input("Imię", key="first_name")
+                last_name = st.text_input("Nazwisko", key="last_name")
+                phone = st.text_input("Nr telefonu", key="phone")
+                email = st.text_input("Email", key="email")
+                bank_account = st.text_input("Nr konta bank", key="bank_account")
+                swift = st.text_input("SWIFT", key="swift")
+                tax_office = st.text_input("Finanzamt", key="tax_office")
+                steuernummer = st.text_input("Steuernummer", key="steuernummer")
+                tax_id = st.text_input("Nr ID", key="tax_id")
+                Dataurodzenia = st.text_input("Data urodzenia klienta", key="Dataurodzenia")
+                Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
+                Ulica = st.text_input("Ulica zamieszkania klienta", key="Ulica")
+                Miejscowośc = st.text_input("Kod pocztowy i miejscowość", key="Miejscowośc")
+                st.form_submit_button(label="")                 
 
-            office = st.selectbox("Biuro", ["Przeworsk", "Jarosław"], key="office")
-            first_name = st.text_input("Imię", key="first_name")
-            last_name = st.text_input("Nazwisko", key="last_name")
-            phone = st.text_input("Nr telefonu", key="phone")
-            email = st.text_input("Email", key="email")
-            bank_account = st.text_input("Nr konta bank", key="bank_account")
-            swift = st.text_input("SWIFT", key="swift")
-            tax_office = st.text_input("Finanzamt", key="tax_office")
-            steuernummer = st.text_input("Steuernummer", key="steuernummer")
-            tax_id = st.text_input("Nr ID", key="tax_id")
-            Dataurodzenia = st.text_input("Data urodzenia klienta", key="Dataurodzenia")
-            Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
-            Ulica = st.text_input("Ulica zamieszkania klienta", key="Ulica")
-            Miejscowośc = st.text_input("Kod pocztowy i miejscowość", key="Miejscowośc")
             marital_status = st.selectbox("Stan cywilny", ["", "kawaler", "żonaty", "rozwiedziony", "panienka", "mężatka"], key="marital_status")
             
             if marital_status == "żonaty":
-                Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
-                imiezony = st.text_input("Imię żony", key="imiezony")
-                spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
-                DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
+                with st.form(key="formmarital_status"):
+                    Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
+                    imiezony = st.text_input("Imię żony", key="imiezony")
+                    spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
+                    DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
+                    st.form_submit_button(label="")                 
             else:
                 Dataslubu = ""
                 imiezony = ""
@@ -339,62 +343,75 @@ def main():
                 reset_service_form()
 
             all_clients = fetch_clients()
-            klient = st.selectbox("Klient", all_clients, key="klient")
-            statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], key="statusDE")
-            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
-            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
-            uwagi = st.text_area("Uwagi", key="uwagi")
-            poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], key="poinformowany")
-            wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], key="wyslany")
-            fahrkosten = st.text_input("Fahrkosten", key="fahrkosten")
-            ubernachtung = st.text_input("Übernachtung", key="ubernachtung")
-            h24 = st.text_input("24h", key="h24")
-            h8 = st.text_input("8h", key="h8")
-            wKabinie = st.text_input("Kabine", key="wKabinie")
-            anUndAb = st.text_input("Ab und an", key="anUndAb")
-            dzieci = st.text_area("Dzieci", key="dzieci")
-            cena = st.selectbox("Cena", ["", "250", "400"], key="cena")
-            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Opłacony", "Zaliczka"], key="statusPlatnosciu")
-            zaplacono = st.text_input("Zapłacono", key="zaplacono")
-            zwrot = ""
-            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotówka", "Faktura"], key="formaZaplaty")
-            kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], key="kontoElster")                    
+
+            with st.form(key="form1"):
+                klient = st.selectbox("Klient", all_clients, key="klient")
+                statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], key="statusDE")
+                rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
+                opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
+                uwagi = st.text_area("Uwagi", key="uwagi")
+                poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], key="poinformowany")
+                wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], key="wyslany")
+                fahrkosten = st.text_input("Fahrkosten", key="fahrkosten")
+                ubernachtung = st.text_input("Übernachtung", key="ubernachtung")
+                h24 = st.text_input("24h", key="h24")
+                h8 = st.text_input("8h", key="h8")
+                wKabinie = st.text_input("Kabine", key="wKabinie")
+                anUndAb = st.text_input("Ab und an", key="anUndAb")
+                dzieci = st.text_area("Dzieci", key="dzieci")
+                cena = st.selectbox("Cena", ["", "250", "400"], key="cena")
+                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Opłacony", "Zaliczka"], key="statusPlatnosciu")
+                zaplacono = st.text_input("Zapłacono", key="zaplacono")
+                zwrot = ""
+                formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotówka", "Faktura"], key="formaZaplaty")
+                kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], key="kontoElster")   
+                st.form_submit_button(label="")                 
             ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], key="ogrObPodatkowy")
+            
             if ogrObPodatkowy == "Tak":
-                aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", key="aktualny_stan_zamieszkania")
-                miejsce_urodzenia = st.text_input("miejsce_urodzenia", key="miejsce_urodzenia")
-                kraj_urodzenia = st.text_input("kraj_urodzenia", key="kraj_urodzenia")
-                narodowosc = st.text_input("narodowosc", key="narodowosc")
+                with st.form(key="form2"):
+                    aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", key="aktualny_stan_zamieszkania")
+                    miejsce_urodzenia = st.text_input("miejsce_urodzenia", key="miejsce_urodzenia")
+                    kraj_urodzenia = st.text_input("kraj_urodzenia", key="kraj_urodzenia")
+                    narodowosc = st.text_input("narodowosc", key="narodowosc")
+                    st.form_submit_button(label="")                 
             else:
                 aktualny_stan_zamieszkania = ""
                 miejsce_urodzenia = ""
                 kraj_urodzenia = ""
                 narodowosc = ""
 
+
             if formaZaplaty == "Faktura":
-                nrfaktury = st.text_input("Nr. Faktury", key="nrfaktury")
-                dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", key="dataWystawieniaFaktury")
+                with st.form(key="formformaZaplaty"):
+                    nrfaktury = st.text_input("Nr. Faktury", key="nrfaktury")
+                    dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", key="dataWystawieniaFaktury")
+                    st.form_submit_button(label="")                 
             else:
                 nrfaktury = ""
                 dataWystawieniaFaktury = ""
 
             zarobkiwPolsce = st.checkbox("Zaznacz, aby dodać zarobki w Polsce", key="zarobkiwPolsce")
             if zarobkiwPolsce:
-                zarobkiMezaEuro = st.text_input("Zarobki męża", key="zarobkiMezaEuro")
-                zarobZonyEuro = st.text_input("zarobZonyEuro", key="zarobZonyEuro")
+                with st.form(key="formzarobkiwPolsce"):
+                    zarobkiMezaEuro = st.text_input("Zarobki męża", key="zarobkiMezaEuro")
+                    zarobZonyEuro = st.text_input("zarobZonyEuro", key="zarobZonyEuro")
+                    st.form_submit_button(label="")                 
             else:
                 zarobkiMezaEuro = ""
                 zarobZonyEuro = ""
 
             dodatkowe = st.checkbox("Zaznacz, aby dodać pola 22, 23, 25, 26, 27, pracodawca, chorobowe", key="dodatkowe")
             if dodatkowe:
-                nr22 = st.text_input("nr22", key="nr22")
-                nr23 = st.text_input("nr23", key="nr23")
-                nr25 = st.text_input("nr25", key="nr25")
-                nr26 = st.text_input("nr26", key="nr26")
-                nr27 = st.text_input("nr27", key="nr27")
-                pracodawca = st.text_input("pracodawca", key="pracodawca")
-                chorobowe = st.text_input("chorobowe", key="chorobowe")
+                with st.form(key="formdodatkowe"):
+                    nr22 = st.text_input("nr22", key="nr22")
+                    nr23 = st.text_input("nr23", key="nr23")
+                    nr25 = st.text_input("nr25", key="nr25")
+                    nr26 = st.text_input("nr26", key="nr26")
+                    nr27 = st.text_input("nr27", key="nr27")
+                    pracodawca = st.text_input("pracodawca", key="pracodawca")
+                    chorobowe = st.text_input("chorobowe", key="chorobowe")
+                    st.form_submit_button(label="")
             else:
                 nr22 = ""
                 nr23 = ""
@@ -406,12 +423,14 @@ def main():
 
             CzyJestPit1 = st.checkbox("Zaznaczyć, jeżeli posiada PIT nr. 1", key="CzyJestPit1")
             if CzyJestPit1:
-                klasaPIT1 = st.text_input("klasaPIT1", key="klasaPIT1")
-                brutto1 = st.text_input("brutto1", key="brutto1")
-                podatek1 = st.text_input("podatek1", key="podatek1")
-                dopłata1 = st.text_input("dopłata1", key="dopłata1")
-                kościelny1 = st.text_input("kościelny1", key="kościelny1")
-                kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", key="kurzarbeitergeld1")
+                with st.form(key="formCzyJestPit1"):
+                    klasaPIT1 = st.text_input("klasaPIT1", key="klasaPIT1")
+                    brutto1 = st.text_input("brutto1", key="brutto1")
+                    podatek1 = st.text_input("podatek1", key="podatek1")
+                    dopłata1 = st.text_input("dopłata1", key="dopłata1")
+                    kościelny1 = st.text_input("kościelny1", key="kościelny1")
+                    kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", key="kurzarbeitergeld1")
+                    st.form_submit_button(label="")
             else:
                 klasaPIT1 = ""
                 brutto1 = ""
@@ -422,12 +441,14 @@ def main():
                 
             CzyJestPit2 = st.checkbox("Zaznaczyć, jeżeli klient posiada PIT nr. 2 ", key="CzyJestPit2")
             if CzyJestPit2:    
-                klasaPIT2 = st.text_input("klasaPIT2", key="klasaPIT2")
-                brutto2 = st.text_input("brutto2", key="brutto2")
-                podatek2 = st.text_input("podatek2", key="podatek2")
-                dopłata2 = st.text_input("dopłata2", key="dopłata2")
-                kościelny2 = st.text_input("kościelny2", key="kościelny2")
-                kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", key="kurzarbeitergeld2")
+                with st.form(key="formCzyJestPit2"):
+                    klasaPIT2 = st.text_input("klasaPIT2", key="klasaPIT2")
+                    brutto2 = st.text_input("brutto2", key="brutto2")
+                    podatek2 = st.text_input("podatek2", key="podatek2")
+                    dopłata2 = st.text_input("dopłata2", key="dopłata2")
+                    kościelny2 = st.text_input("kościelny2", key="kościelny2")
+                    kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", key="kurzarbeitergeld2")
+                    st.form_submit_button(label="")
             else:
                 klasaPIT2 = ""
                 brutto2 = ""
@@ -436,13 +457,15 @@ def main():
                 kościelny2 = ""
                 kurzarbeitergeld2 = ""
             CzyJestPit3 = st.checkbox("Zaznaczyć, jeżeli posiada PIT nr. 3 ", key="CzyJestPit3")
-            if CzyJestPit3:    
-                klasaPIT3 = st.text_input("klasaPIT3", key="klasaPIT3")
-                brutto3 = st.text_input("brutto3", key="brutto3")
-                podatek3 = st.text_input("podatek3", key="podatek3")
-                dopłata3 = st.text_input("dopłata3", key="dopłata3")
-                kościelny3 = st.text_input("kościelny3", key="kościelny3")
-                kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", key="kurzarbeitergeld3")
+            if CzyJestPit3:   
+                with st.form(key="formCzyJestPit3"):
+                    klasaPIT3 = st.text_input("klasaPIT3", key="klasaPIT3")
+                    brutto3 = st.text_input("brutto3", key="brutto3")
+                    podatek3 = st.text_input("podatek3", key="podatek3")
+                    dopłata3 = st.text_input("dopłata3", key="dopłata3")
+                    kościelny3 = st.text_input("kościelny3", key="kościelny3")
+                    kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", key="kurzarbeitergeld3")
+                    st.form_submit_button(label="")
             else:
                 klasaPIT3 = ""
                 brutto3 = ""
