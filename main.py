@@ -134,7 +134,38 @@ def make_unique_columns(df):
         columns[columns[columns == dup].index.values.tolist()] = [f'{dup}_{i}' for i in range(sum(columns == dup))]
     df.columns = columns
     return df
-
+def highlight_status(row):
+    styles = ['' for _ in row]
+    
+    # Highlight the entire row based on "Status" column
+    if row['Status'] == "DE - Niekompletny zestaw":
+        styles = ['background-color: lightcoral' for _ in row]
+    elif row['Status'] == "DE - Rozliczono":
+        styles = ['background-color: yellow' for _ in row]
+    elif row['Status'] == "DE - Otrzymano dokumenty":
+        styles = ['background-color: lightgreen' for _ in row]
+    
+    # Highlight specific cells in "Poinformowany" and "Wysłany" columns
+    if row['Poinformowany'] == "Nie":
+        styles[3] = 'background-color: red; color: white;'
+    if row['Wysłany'] == "Nie":
+        styles[4] = 'background-color: red; color: white;'
+    if row['Poinformowany'] == "Tak":
+        styles[3] = 'background-color: green; color: white;'
+    if row['Wysłany'] == "Tak":
+        styles[4] = 'background-color: green; color: white;'
+    return styles
+def highlight_row_if_status(row):
+    styles = ['' for _ in row]
+    
+    # Highlight the entire row based on "Status" column
+    if row['Status'] == "DE - Niekompletny zestaw":
+        styles = ['background-color: lightcoral' for _ in row]
+    elif row['Status'] == "DE - Rozliczono":
+        styles = ['background-color: yellow' for _ in row]
+    elif row['Status'] == "DE - Otrzymano dokumenty":
+        styles = ['background-color: lightgreen' for _ in row]
+    return styles
 # Main application
 def main():
     st.title("System Zarządzania Klientami")
@@ -231,69 +262,74 @@ def main():
             processed_services = [s for s in services_data if s[1] == "DE - Rozliczono"]
             received_docs_services = [s for s in services_data if s[1] == "DE - Otrzymano dokumenty"]
 
-            uninformed_or_unsent = [s for s in services_data if s[6] == "Nie" or s[7] == "Nie"]
+
+            uninformed_or_unsent = [s for s in services_data if (s[6] == "Nie" or s[7] == "Nie") and s[1] == "DE - Rozliczono"]
             downpayment_services = [s for s in services_data if s[16] == "Zaliczka"]
 
-            # Wyświetlanie podsumowania
-            summary_data = {
-                "Liczba klientów": [total_clients],
-                "Liczba zamówionych usług": [total_services],
-                "Liczba usług z status 'DE - Niekompletny zestaw'": [len(incomplete_services)],
-                "Liczba usług z status 'DE - Rozliczono'": [len(processed_services)],
-                "Liczba usług z status 'DE - Otrzymano dokumenty'": [len(received_docs_services)]
-            }
-            summary_df = pd.DataFrame(summary_data)
-            st.dataframe(summary_df)
+            # Wyświetlanie podsumowania w kafelkach
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric(label="Liczba klientów", value=total_clients)
+            with col2:
+                st.metric(label="Liczba zamówionych usług", value=total_services)
+            with col3:
+                st.metric(label="Usługi 'DE - Niekompletny zestaw'", value=len(incomplete_services))
+            
+            col4, col5, col6 = st.columns(3)
+            with col4:
+                st.metric(label="Usługi 'DE - Rozliczono'", value=len(processed_services))
+            with col5:
+                st.metric(label="Usługi 'DE - Otrzymano dokumenty'", value=len(received_docs_services))
+            with col6:
+                st.metric(label="Do wysłania", value=len(uninformed_or_unsent))
 
-            st.subheader("Klienci z usługami 'DE - Otrzymano dokumenty'")
+            #Klienci z usługami 'DE - Otrzymano dokumenty'
             if received_docs_services:
-                # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(received_docs_services[0])
-                received_docs_df = pd.DataFrame(received_docs_services, columns=[f"Column{i+1}" for i in range(num_columns)])
-                st.dataframe(received_docs_df)
+                selected_columns = [0, 1, 2, 4, 5, 48,49]  # Indeksy kolumn 1, 2, 3, 5, 7
+                received_docs_services_filtered = [[row[i] for i in selected_columns] for row in received_docs_services]
+                received_docs_df = pd.DataFrame(received_docs_services_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Opiekun", "UWAGI", "Konto Elster", "Ogr. ob. podatkowy"])
+                # Numerowanie wierszy od 1
+                received_docs_df.index = received_docs_df.index + 1
+                
 
-            st.subheader("Klienci z usługami 'DE - Niekompletny zestaw'")
+            st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {len(received_docs_df)})</h3>", unsafe_allow_html=True)
+            received_docs_services_styled = received_docs_df.style.apply(highlight_row_if_status, axis=1)
+            st.dataframe(received_docs_services_styled)
+            
+            #Klienci z usługami 'DE - Niekompletny zestaw'
             if incomplete_services:
                 # Upewnij się, że liczba kolumn pasuje do danych
-                num_columns = len(incomplete_services[0])
-                incomplete_services_df = pd.DataFrame(incomplete_services, columns=[f"Column{i+1}" for i in range(num_columns)])
-                st.dataframe(incomplete_services_df)
+                selected_columns = [0, 1, 2, 4, 5, 48,49]  # Indeksy kolumn 1, 2, 3, 5, 7
+                incomplete_services_filtered = [[row[i] for i in selected_columns] for row in incomplete_services]
+                incomplete_services_df = pd.DataFrame(incomplete_services_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Opiekun", "UWAGI", "Konto Elster", "Ogr. ob. podatkowy"])
+                # Numerowanie wierszy od 1
+                incomplete_services_df.index = incomplete_services_df.index + 1
+            
+            st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({len(incomplete_services_df)})</h3>", unsafe_allow_html=True)
+            
+            incomplete_services_styled = incomplete_services_df.style.apply(highlight_row_if_status, axis=1)
+            st.dataframe(incomplete_services_styled)    
+            
+            #Klienci do wysłania
 
-            st.subheader("Klienci do wysłania")
             if uninformed_or_unsent:
                 # Upewnij się, że liczba kolumn pasuje do danych
                 selected_columns = [0, 1, 2, 6, 7, 5]  # Indeksy kolumn 1, 2, 3, 5, 7
                 uninformed_or_unsent_filtered = [[row[i] for i in selected_columns] for row in uninformed_or_unsent]
                 uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Poinformowany", "Wysłany", "UWAGI"])
-                
-            def highlight_status(row):
-                styles = ['' for _ in row]
-                
-                # Highlight the entire row based on "Status" column
-                if row['Status'] == "DE - Niekompletny zestaw":
-                    styles = ['background-color: lightcoral' for _ in row]
-                elif row['Status'] == "DE - Rozliczono":
-                    styles = ['background-color: yellow' for _ in row]
-                elif row['Status'] == "DE - Otrzymano dokumenty":
-                    styles = ['background-color: lightgreen' for _ in row]
-                
-                # Highlight specific cells in "Poinformowany" and "Wysłany" columns
-                if row['Poinformowany'] == "Nie":
-                    styles[3] = 'background-color: red; color: white;'
-                if row['Wysłany'] == "Nie":
-                    styles[4] = 'background-color: red; color: white;'
-                
-                return styles
-
+            
+            st.subheader(f"Klienci do wysłania (ilość: {len(uninformed_or_unsent_df)})")    
             uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
             st.dataframe(uninformed_or_unsent_styled)
             
-            st.subheader("Klienci z zaliczką")
+            #Klienci z zaliczką
             if downpayment_services:
                 # Upewnij się, że liczba kolumn pasuje do danych
                 selected_columns = [0, 15,16, 17, 18, 19,5, 20]  # Indeksy kolumn 1, 2, 3, 5, 7
                 downpayment_services_filtered = [[row[i] for i in selected_columns] for row in downpayment_services]
                 downpayment_services_df = pd.DataFrame(downpayment_services_filtered, columns=["Imię i Nazwisko","Cena", "Status płatności", "Zapłacono", "Forma zapłaty", "Nr. faktury", "Uwagi","Data wystawienia faktury"])
+            
+            st.subheader(f"Klienci z zaliczką ({len(downpayment_services_df)})")
             st.dataframe(downpayment_services_df)
                 
 
