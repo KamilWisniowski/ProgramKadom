@@ -119,6 +119,8 @@ def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fa
     st.success("Nowa usługa została dodana")
 import streamlit as st
 
+import streamlit as st
+
 def edytuj_klienta():
     st.subheader("Edytuj klienta")
 
@@ -167,20 +169,14 @@ def edytuj_klienta():
                 atualizuj_klienta = st.form_submit_button(label='Submit')
 
             if atualizuj_klienta:
+                all_clients = fetch_clients()
                 updated_row = [
                     first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowośc, Dataslubu, DataUrŻony, imiezony
                 ]
 
-                # Find the index of the client to update
-                for i, row in enumerate(rows):
-                    if row == client_data:
-                        rows[i] = updated_row
-                        break
-                
-                sheet1.clear()
-                sheet1.append_row(sheet1.get_all_values()[0])  # Append header row
-                for row in rows:
-                    sheet1.append_row(row)
+                # Update the specific row in the Google Sheet
+                cell_range = f'A{rows.index(client_data) + 2}:S{rows.index(client_data) + 2}'
+                sheet1.update(cell_range, [updated_row])
 
                 st.success("Dane klienta zostały zaktualizowane")
 
@@ -320,18 +316,19 @@ def main():
                 tax_office = st.text_input("Finanzamt", key="tax_office")
                 steuernummer = st.text_input("Steuernummer", key="steuernummer")
                 tax_id = st.text_input("Nr ID", key="tax_id")
+                if marital_status2 == "żonaty":
+                    spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
                 Dataurodzenia = st.text_input("Data urodzenia klienta", key="Dataurodzenia")
+                if marital_status2 == "żonaty":
+                    DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
                 Ulica = st.text_input("Ulica zamieszkania klienta", key="Ulica")
                 Miejscowośc = st.text_input("Kod pocztowy i miejscowość", key="Miejscowośc")         
                 marital_status = st.text_input("Stan cywilny", key="marital_status",disabled=True)
                 if marital_status2 == "żonaty":
                     st.session_state["marital_status2"] = "żonaty"
-
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
                     imiezony = st.text_input("Imię żony", key="imiezony")
-                    spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
-                    DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
                 else:
                     Dataslubu = ""
                     imiezony = ""
