@@ -185,11 +185,15 @@ def edytuj_usluge():
     all_clients = fetch_clients()
     all_services = fetch_services_data()
 
+    # Prepare options for select box
+    service_options = [f"{service_data[0]} - {service_data[2]}" for service_data in all_services]
+
     # Display services to edit
-    service_index = st.selectbox("Wybierz usługę do edycji", range(len(all_services)), format_func=lambda x: f"Usługa {x+1}")
+    service_index = st.selectbox("Wybierz usługę do edycji", service_options)
     
     if service_index is not None:
-        st.subheader(f"Edycja usługi: {service_index + 1}")
+        service_index = service_options.index(service_index)
+        st.subheader(f"Edycja usługi: {service_options[service_index]}")
         service_data = all_services[service_index]
 
         with st.form(key="status_form"):
