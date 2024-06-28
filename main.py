@@ -195,68 +195,77 @@ def edytuj_usluge():
         service_index = service_options.index(service_index)
         st.subheader(f"Edycja usługi: {service_options[service_index]}")
         service_data = all_services[service_index]
-
+        
+        edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
+        dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
+        EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
+        EdytujPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli chcesz edytować)", key="EdytujPit2")
+    
         with st.form(key="status_form"):
             klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
-            statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
+            statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
             rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else 0)
             zwrot = st.text_input("Zwrot", service_data[3])
             opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
             uwagi = st.text_area("Uwagi", service_data[5])
             poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
             wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
-            fahrkosten = st.text_input("Fahrkosten", service_data[8])
-            ubernachtung = st.text_input("Übernachtung", service_data[9])
-            h24 = st.text_input("24h", service_data[10])
-            h8 = st.text_input("8h", service_data[11])
-            wKabinie = st.text_input("Kabine", service_data[12])
-            anUndAb = st.text_input("Ab und an", service_data[13])
-            dzieci = st.text_area("Dzieci", service_data[14])
-            cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else 0)
-            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Opłacony", "Zaliczka"], index=["Nieopłacony", "Opłacony", "Zaliczka"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Opłacony", "Zaliczka"] else 0)
-            zaplacono = st.text_input("Zapłacono", service_data[17])
-            formaZaplaty = st.text_input("Metoda płatności", service_data[18], disabled=True)
-            nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if formaZaplaty == "Faktura" else ""
-            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if formaZaplaty == "Faktura" else ""
-            kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
-            ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0, disabled=True)
-            
-            aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
-            miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
-            kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[25]) if ogrObPodatkowy == "Tak" else ""
-            narodowosc = st.text_input("narodowosc", service_data[26]) if ogrObPodatkowy == "Tak" else ""
-            
-            zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[27])
-            zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[28])
+            if dodatkowe2:
+                fahrkosten = st.text_input("Fahrkosten", service_data[8])
+                ubernachtung = st.text_input("Übernachtung", service_data[9])
+                h24 = st.text_input("24h", service_data[10])
+                h8 = st.text_input("8h", service_data[11])
+                wKabinie = st.text_input("Kabine", service_data[12])
+                anUndAb = st.text_input("Ab und an", service_data[13])
+                dzieci = st.text_area("Dzieci", service_data[14])
+                 
+                kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
+                ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0, disabled=True)
+                
+                aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
+                miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
+                kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[25]) if ogrObPodatkowy == "Tak" else ""
+                narodowosc = st.text_input("narodowosc", service_data[26]) if ogrObPodatkowy == "Tak" else ""
+                
+                zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[27])
+                zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[28])
+            if edytujPlatnosc:
+                cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else 0)
+                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0)
+                zaplacono = st.text_input("Zapłacono", service_data[17])
+                formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))
+                nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if formaZaplaty == "Faktura" else ""
+                dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if formaZaplaty == "Faktura" else ""
+           
+            if EdytujPit:
+                nr22 = st.text_input("nr22", service_data[29])
+                nr23 = st.text_input("nr23", service_data[30])
+                nr25 = st.text_input("nr25", service_data[31])
+                nr26 = st.text_input("nr26", service_data[32])
+                nr27 = st.text_input("nr27", service_data[33])
+                pracodawca = st.text_input("pracodawca", service_data[34])
+                chorobowe = st.text_input("chorobowe", service_data[35])
 
-            nr22 = st.text_input("nr22", service_data[29])
-            nr23 = st.text_input("nr23", service_data[30])
-            nr25 = st.text_input("nr25", service_data[31])
-            nr26 = st.text_input("nr26", service_data[32])
-            nr27 = st.text_input("nr27", service_data[33])
-            pracodawca = st.text_input("pracodawca", service_data[34])
-            chorobowe = st.text_input("chorobowe", service_data[35])
+                klasaPIT1 = st.text_input("klasaPIT1", service_data[36])
+                brutto1 = st.text_input("brutto1", service_data[37])
+                podatek1 = st.text_input("podatek1", service_data[38])
+                dopłata1 = st.text_input("dopłata1", service_data[39])
+                kościelny1 = st.text_input("kościelny1", service_data[40])
+                kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[41])
+                
+                klasaPIT2 = st.text_input("klasaPIT2", service_data[42])
+                brutto2 = st.text_input("brutto2", service_data[43])
+                podatek2 = st.text_input("podatek2", service_data[44])
+                dopłata2 = st.text_input("dopłata2", service_data[45])
+                kościelny2 = st.text_input("kościelny2", service_data[46])
+                kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[47])
 
-            klasaPIT1 = st.text_input("klasaPIT1", service_data[36])
-            brutto1 = st.text_input("brutto1", service_data[37])
-            podatek1 = st.text_input("podatek1", service_data[38])
-            dopłata1 = st.text_input("dopłata1", service_data[39])
-            kościelny1 = st.text_input("kościelny1", service_data[40])
-            kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[41])
-            
-            klasaPIT2 = st.text_input("klasaPIT2", service_data[42])
-            brutto2 = st.text_input("brutto2", service_data[43])
-            podatek2 = st.text_input("podatek2", service_data[44])
-            dopłata2 = st.text_input("dopłata2", service_data[45])
-            kościelny2 = st.text_input("kościelny2", service_data[46])
-            kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[47])
-
-            klasaPIT3 = st.text_input("klasaPIT3", service_data[48])
-            brutto3 = st.text_input("brutto3", service_data[49])
-            podatek3 = st.text_input("podatek3", service_data[50])
-            dopłata3 = st.text_input("dopłata3", service_data[51])
-            kościelny3 = st.text_input("kościelny3", service_data[52])
-            kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])
+                klasaPIT3 = st.text_input("klasaPIT3", service_data[48])
+                brutto3 = st.text_input("brutto3", service_data[49])
+                podatek3 = st.text_input("podatek3", service_data[50])
+                dopłata3 = st.text_input("dopłata3", service_data[51])
+                kościelny3 = st.text_input("kościelny3", service_data[52])
+                kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])
 
             aktualizuj_usluge = st.form_submit_button(label='Wyślij')
 
@@ -511,7 +520,7 @@ def main():
             CzyJestPit1 = st.checkbox("PIT nr. 1 (Zaznaczyć, jeżeli klient posiada) ", key="CzyJestPit1")
             CzyJestPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit2")
             CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
-            formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotówka", "Faktura"], key="formaZaplaty2")
+            formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
 
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
             st.session_state["formaZaplaty"] = formaZaplaty2
@@ -521,7 +530,7 @@ def main():
             with st.form(key="status_form", border=False):
                 
                 klient = st.selectbox("Klient", all_clients, key="klient")
-                statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], key="statusDE")
+                statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
                 rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
                 uwagi = st.text_area("Uwagi", key="uwagi")
@@ -535,7 +544,7 @@ def main():
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
                 cena = st.selectbox("Cena", ["", "250", "400"], key="cena")
-                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Opłacony", "Zaliczka"], key="statusPlatnosciu")
+                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
                 zwrot = ""
                 formaZaplaty = st.text_input("Metoda płatności", key="formaZaplaty", disabled=True)
