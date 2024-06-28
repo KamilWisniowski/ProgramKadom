@@ -47,7 +47,6 @@ client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
 
-
 def fetch_clients():
     clients = []
     rows = sheet1.get_all_values()[1:]  # Skip header row
@@ -179,6 +178,100 @@ def edytuj_klienta():
                 sheet1.update(cell_range, [updated_row])
 
                 st.success("Dane klienta zostały zaktualizowane")
+# Function to edit a service
+def edytuj_usluge():
+    st.subheader("Edytuj usługę")
+
+    all_clients = fetch_clients()
+    all_services = fetch_services_data()
+
+    # Display services to edit
+    service_index = st.selectbox("Wybierz usługę do edycji", range(len(all_services)), format_func=lambda x: f"Usługa {x+1}")
+    
+    if service_index is not None:
+        st.subheader(f"Edycja usługi: {service_index + 1}")
+        service_data = all_services[service_index]
+
+        with st.form(key="status_form"):
+            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
+            statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
+            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else 0)
+            zwrot = st.text_input("Zwrot", service_data[3])
+            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
+            uwagi = st.text_area("Uwagi", service_data[5])
+            poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
+            wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
+            fahrkosten = st.text_input("Fahrkosten", service_data[8])
+            ubernachtung = st.text_input("Übernachtung", service_data[9])
+            h24 = st.text_input("24h", service_data[10])
+            h8 = st.text_input("8h", service_data[11])
+            wKabinie = st.text_input("Kabine", service_data[12])
+            anUndAb = st.text_input("Ab und an", service_data[13])
+            dzieci = st.text_area("Dzieci", service_data[14])
+            cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else 0)
+            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Opłacony", "Zaliczka"], index=["Nieopłacony", "Opłacony", "Zaliczka"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Opłacony", "Zaliczka"] else 0)
+            zaplacono = st.text_input("Zapłacono", service_data[17])
+            formaZaplaty = st.text_input("Metoda płatności", service_data[18], disabled=True)
+            nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if formaZaplaty == "Faktura" else ""
+            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if formaZaplaty == "Faktura" else ""
+            kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
+            ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0, disabled=True)
+            
+            aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
+            miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
+            kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[25]) if ogrObPodatkowy == "Tak" else ""
+            narodowosc = st.text_input("narodowosc", service_data[26]) if ogrObPodatkowy == "Tak" else ""
+            
+            zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[27])
+            zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[28])
+
+            nr22 = st.text_input("nr22", service_data[29])
+            nr23 = st.text_input("nr23", service_data[30])
+            nr25 = st.text_input("nr25", service_data[31])
+            nr26 = st.text_input("nr26", service_data[32])
+            nr27 = st.text_input("nr27", service_data[33])
+            pracodawca = st.text_input("pracodawca", service_data[34])
+            chorobowe = st.text_input("chorobowe", service_data[35])
+
+            klasaPIT1 = st.text_input("klasaPIT1", service_data[36])
+            brutto1 = st.text_input("brutto1", service_data[37])
+            podatek1 = st.text_input("podatek1", service_data[38])
+            dopłata1 = st.text_input("dopłata1", service_data[39])
+            kościelny1 = st.text_input("kościelny1", service_data[40])
+            kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[41])
+            
+            klasaPIT2 = st.text_input("klasaPIT2", service_data[42])
+            brutto2 = st.text_input("brutto2", service_data[43])
+            podatek2 = st.text_input("podatek2", service_data[44])
+            dopłata2 = st.text_input("dopłata2", service_data[45])
+            kościelny2 = st.text_input("kościelny2", service_data[46])
+            kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[47])
+
+            klasaPIT3 = st.text_input("klasaPIT3", service_data[48])
+            brutto3 = st.text_input("brutto3", service_data[49])
+            podatek3 = st.text_input("podatek3", service_data[50])
+            dopłata3 = st.text_input("dopłata3", service_data[51])
+            kościelny3 = st.text_input("kościelny3", service_data[52])
+            kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])
+
+            aktualizuj_usluge = st.form_submit_button(label='Wyślij')
+
+        if aktualizuj_usluge:
+            updated_row = [
+                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3
+            ]
+
+            # Define the range up to column V (22 columns)
+            num_columns = min(len(updated_row), 22)
+            updated_row = updated_row[:num_columns]
+            start_col = 'A'
+            end_col = chr(ord(start_col) + num_columns - 1)
+            cell_range = f'A{service_index + 2}:{end_col}{service_index + 2}'
+
+            # Update the specific row in the Google Sheet
+            sheet2.update(cell_range, [updated_row])
+
+            st.success("Dane usługi zostały zaktualizowane")
 
 # Function to fetch and filter services data
 @st.cache_data
@@ -265,7 +358,7 @@ def main():
             st.sidebar.error("Błędna nazwa użytkownika")
 
     if cookies.get("logged_in") == "True":
-        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel", "Edytuj klienta"]
+        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel", "Edytuj klienta","Edytuj usługę"]
         choice = st.sidebar.selectbox("Menu", menu)
 
 
@@ -537,6 +630,7 @@ def main():
                     st.error("Podanie danych klienta, Statusu DE oraz roku rozliczenia jest wymagane")
                 else:
                     add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc)
+                
         elif choice == "Podsumowanie":
             st.subheader("Podsumowanie")
 
@@ -631,7 +725,9 @@ def main():
                 update_status_data(edited_df)
                 st.success("Dane zostały zaktualizowane")
         elif choice == "Edytuj klienta":
-                    edytuj_klienta()
+            edytuj_klienta()
+        elif choice == "Edytuj usługę":
+            edytuj_usluge()
     else:
         st.info("Proszę się zalogować")
 
