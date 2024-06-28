@@ -165,7 +165,7 @@ def edytuj_klienta():
                 Dataslubu = st.text_input("Data ślubu", client_data[16])
                 DataUrŻony = st.text_input("Data urodzenia żony", client_data[17])
                 imiezony = st.text_input("Imię żony", client_data[18])
-                atualizuj_klienta = st.form_submit_button(label='Submit')
+                atualizuj_klienta = st.form_submit_button(label='Aktualizuj klienta')
 
             if atualizuj_klienta:
                 all_clients = fetch_clients()
@@ -195,11 +195,14 @@ def edytuj_usluge():
         service_index = service_options.index(service_index)
         st.subheader(f"Edycja usługi: {service_options[service_index]}")
         service_data = all_services[service_index]
+        with st.form(key="status_form2"):
         
-        edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
-        dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
-        EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
-        daneKontaktowe = st.checkbox("Zaznacz, jeżeli chcesz edytować dane kontaktowe", key="daneKontaktowe")
+            edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
+            dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
+            EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
+            daneKontaktowe = st.checkbox("Zaznacz, jeżeli chcesz edytować dane kontaktowe", key="daneKontaktowe")
+            aktualizuj_pola_uslug = st.form_submit_button(label='Załaduj')
+
         with st.form(key="status_form"):
             klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
             statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
@@ -264,7 +267,7 @@ def edytuj_usluge():
             kościelny3 = st.text_input("kościelny3", service_data[52])if EdytujPit else 0
             kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])if EdytujPit else 0
 
-            aktualizuj_usluge = st.form_submit_button(label='Wyślij')
+            aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
 
         if aktualizuj_usluge:
             updated_row = [
