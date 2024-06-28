@@ -199,7 +199,6 @@ def edytuj_usluge():
         edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
         dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
         EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
-        EdytujPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli chcesz edytować)", key="EdytujPit2")
     
         with st.form(key="status_form"):
             klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
