@@ -278,13 +278,13 @@ def edytuj_usluge():
             st.success("Dane usługi zostały zaktualizowane")
 
 # Function to fetch and filter services data
-@st.cache_data
+
 def fetch_services_data():
     rows = sheet2.get_all_values()[1:]  # Skip header row
     return rows
 
 # Function to fetch the entire ZP status sheet data
-@st.cache_data
+
 def fetch_full_status_data():
     rows = sheet2.get_all_values()  # Include header row
     return pd.DataFrame(rows[1:], columns=rows[0])
