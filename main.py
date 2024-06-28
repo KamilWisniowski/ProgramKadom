@@ -47,7 +47,7 @@ client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
 
-@st.cache_data
+
 def fetch_clients():
     clients = []
     rows = sheet1.get_all_values()[1:]  # Skip header row
