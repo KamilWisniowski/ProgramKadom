@@ -199,13 +199,13 @@ def edytuj_usluge():
         edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
         dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
         EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
-    
+        daneKontaktowe = st.checkbox("Zaznacz, jeżeli chcesz edytować dane kontaktowe", key="daneKontaktowe")
         with st.form(key="status_form"):
-            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
+            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0) if daneKontaktowe else 0
             statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
-            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else 0)
+            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else 0) if daneKontaktowe else 0
             zwrot = st.text_input("Zwrot", service_data[3])
-            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
+            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0) if daneKontaktowe else 0
             uwagi = st.text_area("Uwagi", service_data[5])
             poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
             wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
@@ -218,8 +218,8 @@ def edytuj_usluge():
                 anUndAb = st.text_input("Ab und an", service_data[13])
                 dzieci = st.text_area("Dzieci", service_data[14])
                  
-                kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
-                ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0, disabled=True)
+                kontoElster = st.selectbox("konto Elster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
+                ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0)
                 
                 aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
                 miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
