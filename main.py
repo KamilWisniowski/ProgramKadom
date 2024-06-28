@@ -92,9 +92,17 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
     ]
     sheet1.append_row(new_row)
     st.success("Nowy klient został dodany")
-
+def service_exists(klient, statusDE, rok):
+    rows = sheet2.get_all_values()[1:]  # Skip header row
+    for row in rows:
+        if row[0] == klient and row[1] == statusDE and row[2] == str(rok):
+            return True
+    return False
 # Function to add a new service to the Google Sheet
 def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc):
+    if service_exists(klient, statusDE, rok):
+        st.markdown(f'<span style="border-radius:10px;padding:18px;background-color:rgba(255, 43, 43, 0.09);">Usługa dla klienta:<span style="font-size:18px; font-weight:bold;color:lightcoral"> {klient} </span>o statusie: <span style="font-size:18px; font-weight:bold;"> {statusDE}</span> za rok:<span style="font-size:18px; font-weight:bold;">  {rok}</span> już ISTNIEJE', unsafe_allow_html=True)
+        return
     new_row = [
         klient,
         statusDE,
@@ -109,6 +117,72 @@ def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fa
     ]
     sheet2.append_row(new_row)
     st.success("Nowa usługa została dodana")
+import streamlit as st
+
+def edytuj_klienta():
+    st.subheader("Edytuj klienta")
+
+    # Fetch existing clients
+    all_clients = fetch_clients()
+
+    # Pole do filtrowania i wyboru klientów
+    filter_input = st.text_input("Filtruj klientów")
+    filtered_clients = [client for client in all_clients if filter_input.lower() in client.lower()]
+
+    klient = st.selectbox("Wybierz klienta do edycji", filtered_clients, key="selected_client")
+
+    if klient:
+        st.subheader(f"Edycja klienta: {klient}")
+
+        # Fetch client data based on the selected client
+        client_data = None
+        rows = sheet1.get_all_values()[1:]  # Skip header row
+        for row in rows:
+            if f"{row[1]} {row[0]} {row[3]}" == klient:
+                client_data = row
+                break
+
+        if client_data:
+            with st.form(key='info_form'):
+                # Display and allow editing of client data
+                first_name = st.text_input("Imię", client_data[0])
+                last_name = st.text_input("Nazwisko", client_data[1])
+                office = st.selectbox("Biuro", ["Przeworsk", "Jarosław"], index=["Przeworsk", "Jarosław"].index(client_data[2]))
+                phone = st.text_input("Nr telefonu", client_data[3])
+                email = st.text_input("Email", client_data[4])
+                marital_status = st.selectbox('Stan cywilny', ['kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'], index=['kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'].index(client_data[5]))
+                bank_account = st.text_input("Nr konta bankowego", client_data[6])
+                swift = st.text_input("SWIFT", client_data[7])
+                tax_office = st.text_input("Finanzamt", client_data[8])
+                steuernummer = st.text_input("Steuernummer", client_data[9])
+                tax_id = st.text_input("Nr ID", client_data[10])
+                spouse_tax_id = st.text_input("Nr ID małżonka", client_data[11])
+                Dataurodzenia = st.text_input("Data urodzenia", client_data[12])
+                Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], index=["", "VD", "RK", "EV"].index(client_data[13]))
+                Ulica = st.text_input("Ulica zamieszkania", client_data[14])
+                Miejscowośc = st.text_input("Kod pocztowy i miejscowość", client_data[15])
+                Dataslubu = st.text_input("Data ślubu", client_data[16])
+                DataUrŻony = st.text_input("Data urodzenia żony", client_data[17])
+                imiezony = st.text_input("Imię żony", client_data[18])
+                atualizuj_klienta = st.form_submit_button(label='Submit')
+
+            if atualizuj_klienta:
+                updated_row = [
+                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowośc, Dataslubu, DataUrŻony, imiezony
+                ]
+
+                # Find the index of the client to update
+                for i, row in enumerate(rows):
+                    if row == client_data:
+                        rows[i] = updated_row
+                        break
+                
+                sheet1.clear()
+                sheet1.append_row(sheet1.get_all_values()[0])  # Append header row
+                for row in rows:
+                    sheet1.append_row(row)
+
+                st.success("Dane klienta zostały zaktualizowane")
 
 # Function to fetch and filter services data
 @st.cache_data
@@ -195,7 +269,7 @@ def main():
             st.sidebar.error("Błędna nazwa użytkownika")
 
     if cookies.get("logged_in") == "True":
-        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel"]
+        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel", "Edytuj klienta"]
         choice = st.sidebar.selectbox("Menu", menu)
 
 
@@ -220,7 +294,7 @@ def main():
             st.session_state["imiezony"] = ""
             st.session_state["spouse_tax_id"] = ""
             st.session_state["DataUrŻony"] = ""
-
+        
         # Sekcja dodawania klienta
         if choice == "Dodaj klienta":
             st.subheader("Dodaj nowego klienta")
@@ -559,7 +633,8 @@ def main():
             if st.button("Zapisz zmiany"):
                 update_status_data(edited_df)
                 st.success("Dane zostały zaktualizowane")
-
+        elif choice == "Edytuj klienta":
+                    edytuj_klienta()
     else:
         st.info("Proszę się zalogować")
 
