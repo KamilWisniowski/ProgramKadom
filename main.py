@@ -201,7 +201,7 @@ def edytuj_usluge():
         EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
         daneKontaktowe = st.checkbox("Zaznacz, jeżeli chcesz edytować dane kontaktowe", key="daneKontaktowe")
         with st.form(key="status_form"):
-            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0) if daneKontaktowe else 0
+            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
             statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], index=["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"].index(service_data[1]) if service_data[1] in ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"] else 0)
             rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else 0) if daneKontaktowe else 0
             zwrot = st.text_input("Zwrot", service_data[3])
@@ -209,62 +209,60 @@ def edytuj_usluge():
             uwagi = st.text_area("Uwagi", service_data[5])
             poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
             wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
-            if dodatkowe2:
-                fahrkosten = st.text_input("Fahrkosten", service_data[8])
-                ubernachtung = st.text_input("Übernachtung", service_data[9])
-                h24 = st.text_input("24h", service_data[10])
-                h8 = st.text_input("8h", service_data[11])
-                wKabinie = st.text_input("Kabine", service_data[12])
-                anUndAb = st.text_input("Ab und an", service_data[13])
-                dzieci = st.text_area("Dzieci", service_data[14])
-                 
-                kontoElster = st.selectbox("konto Elster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)
-                ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0)
+
+            fahrkosten = st.text_input("Fahrkosten", service_data[8])if dodatkowe2 else 0
+            ubernachtung = st.text_input("Übernachtung", service_data[9])if dodatkowe2 else 0
+            h24 = st.text_input("24h", service_data[10])if dodatkowe2 else 0
+            h8 = st.text_input("8h", service_data[11])if dodatkowe2 else 0
+            wKabinie = st.text_input("Kabine", service_data[12])if dodatkowe2 else 0
+            anUndAb = st.text_input("Ab und an", service_data[13])if dodatkowe2 else 0
+            dzieci = st.text_area("Dzieci", service_data[14])if dodatkowe2 else 0
                 
-                aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
-                miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
-                kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[25]) if ogrObPodatkowy == "Tak" else ""
-                narodowosc = st.text_input("narodowosc", service_data[26]) if ogrObPodatkowy == "Tak" else ""
-                
-                zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[27])
-                zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[28])
-            if edytujPlatnosc:
-                cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else 0)
-                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0)
-                zaplacono = st.text_input("Zapłacono", service_data[17])
-                formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))
-                nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if formaZaplaty == "Faktura" else ""
-                dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if formaZaplaty == "Faktura" else ""
+            kontoElster = st.selectbox("konto Elster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[21]) if service_data[21] in ["Nie", "Tak"] else 0)if dodatkowe2 else 0
+            ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[22]) if service_data[22] in ["Nie", "Tak"] else 0)if dodatkowe2 else 0
+            
+            aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[23]) if ogrObPodatkowy == "Tak" else ""
+            miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[24]) if ogrObPodatkowy == "Tak" else ""
+            kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[25]) if ogrObPodatkowy == "Tak" else ""
+            narodowosc = st.text_input("narodowosc", service_data[26]) if ogrObPodatkowy == "Tak" else ""
+            
+            zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[27])if dodatkowe2 else 0
+            zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[28])if dodatkowe2 else 0
+            cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else 0) if edytujPlatnosc else 0
+            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0)if edytujPlatnosc else 0
+            zaplacono = st.text_input("Zapłacono", service_data[17])if edytujPlatnosc else 0
+            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))if edytujPlatnosc else 0
+            nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if formaZaplaty == "Faktura" else ""if edytujPlatnosc else 0
+            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if formaZaplaty == "Faktura" else ""if edytujPlatnosc else 0
+            nr22 = st.text_input("nr22", service_data[29]) if EdytujPit else 0
            
-            if EdytujPit:
-                nr22 = st.text_input("nr22", service_data[29])
-                nr23 = st.text_input("nr23", service_data[30])
-                nr25 = st.text_input("nr25", service_data[31])
-                nr26 = st.text_input("nr26", service_data[32])
-                nr27 = st.text_input("nr27", service_data[33])
-                pracodawca = st.text_input("pracodawca", service_data[34])
-                chorobowe = st.text_input("chorobowe", service_data[35])
+            nr23 = st.text_input("nr23", service_data[30])if EdytujPit else 0
+            nr25 = st.text_input("nr25", service_data[31])if EdytujPit else 0
+            nr26 = st.text_input("nr26", service_data[32])if EdytujPit else 0
+            nr27 = st.text_input("nr27", service_data[33])if EdytujPit else 0
+            pracodawca = st.text_input("pracodawca", service_data[34])if EdytujPit else 0
+            chorobowe = st.text_input("chorobowe", service_data[35])if EdytujPit else 0
 
-                klasaPIT1 = st.text_input("klasaPIT1", service_data[36])
-                brutto1 = st.text_input("brutto1", service_data[37])
-                podatek1 = st.text_input("podatek1", service_data[38])
-                dopłata1 = st.text_input("dopłata1", service_data[39])
-                kościelny1 = st.text_input("kościelny1", service_data[40])
-                kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[41])
-                
-                klasaPIT2 = st.text_input("klasaPIT2", service_data[42])
-                brutto2 = st.text_input("brutto2", service_data[43])
-                podatek2 = st.text_input("podatek2", service_data[44])
-                dopłata2 = st.text_input("dopłata2", service_data[45])
-                kościelny2 = st.text_input("kościelny2", service_data[46])
-                kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[47])
+            klasaPIT1 = st.text_input("klasaPIT1", service_data[36])if EdytujPit else 0
+            brutto1 = st.text_input("brutto1", service_data[37])if EdytujPit else 0
+            podatek1 = st.text_input("podatek1", service_data[38])if EdytujPit else 0
+            dopłata1 = st.text_input("dopłata1", service_data[39])if EdytujPit else 0
+            kościelny1 = st.text_input("kościelny1", service_data[40])if EdytujPit else 0
+            kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[41])if EdytujPit else 0
+            
+            klasaPIT2 = st.text_input("klasaPIT2", service_data[42])if EdytujPit else 0
+            brutto2 = st.text_input("brutto2", service_data[43])if EdytujPit else 0
+            podatek2 = st.text_input("podatek2", service_data[44])if EdytujPit else 0
+            dopłata2 = st.text_input("dopłata2", service_data[45])if EdytujPit else 0
+            kościelny2 = st.text_input("kościelny2", service_data[46])if EdytujPit else 0
+            kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[47])if EdytujPit else 0
 
-                klasaPIT3 = st.text_input("klasaPIT3", service_data[48])
-                brutto3 = st.text_input("brutto3", service_data[49])
-                podatek3 = st.text_input("podatek3", service_data[50])
-                dopłata3 = st.text_input("dopłata3", service_data[51])
-                kościelny3 = st.text_input("kościelny3", service_data[52])
-                kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])
+            klasaPIT3 = st.text_input("klasaPIT3", service_data[48])if EdytujPit else 0
+            brutto3 = st.text_input("brutto3", service_data[49])if EdytujPit else 0
+            podatek3 = st.text_input("podatek3", service_data[50])if EdytujPit else 0
+            dopłata3 = st.text_input("dopłata3", service_data[51])if EdytujPit else 0
+            kościelny3 = st.text_input("kościelny3", service_data[52])if EdytujPit else 0
+            kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])if EdytujPit else 0
 
             aktualizuj_usluge = st.form_submit_button(label='Wyślij')
 
