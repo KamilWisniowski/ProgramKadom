@@ -275,7 +275,7 @@ def edytuj_usluge():
             ]
 
             # Define the range up to column V (22 columns)
-            num_columns = min(len(updated_row), 22)
+            num_columns = min(len(updated_row), 54)
             updated_row = updated_row[:num_columns]
             start_col = 'A'
             end_col = chr(ord(start_col) + num_columns - 1)
@@ -713,9 +713,9 @@ def main():
                 uninformed_or_unsent_filtered = [[row[i] for i in selected_columns] for row in uninformed_or_unsent]
                 uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Poinformowany", "Wysłany", "UWAGI"])
             
-            st.subheader(f"Klienci do wysłania (ilość: {len(uninformed_or_unsent_df)})")    
-            uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
-            st.dataframe(uninformed_or_unsent_styled)
+                st.subheader(f"Klienci do wysłania (ilość: {len(uninformed_or_unsent_df)})")    
+                uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
+                st.dataframe(uninformed_or_unsent_styled)
             
             #Klienci z zaliczką
             if downpayment_services:
