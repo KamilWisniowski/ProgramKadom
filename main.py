@@ -265,20 +265,21 @@ def edytuj_usluge():
             dopłata3 = st.text_input("dopłata3", service_data[51])if EdytujPit else 0
             kościelny3 = st.text_input("kościelny3", service_data[52])if EdytujPit else 0
             kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[53])if EdytujPit else 0
-
+            kontoElster= st.text_input("kurzarbeitergeld3", service_data[54])if EdytujPit else 0
+            ogrObPodatkowy= st.text_input("kurzarbeitergeld3", service_data[55])if EdytujPit else 0
+            aktualny_stan_zamieszkania= st.text_input("kurzarbeitergeld3", service_data[56])if EdytujPit else 0
+            miejsce_urodzenia= st.text_input("kurzarbeitergeld3", service_data[57])if EdytujPit else 0
+            kraj_urodzenia= st.text_input("kurzarbeitergeld3", service_data[58])if EdytujPit else 0
+            narodowosc= st.text_input("kurzarbeitergeld3", service_data[59])if EdytujPit else 0
             aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
 
         if aktualizuj_usluge:
             updated_row = [
-                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3
+                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc
             ]
 
-            # Define the range up to column V (22 columns)
-            num_columns = min(len(updated_row), 54)
-            updated_row = updated_row[:num_columns]
-            start_col = 'A'
-            end_col = chr(ord(start_col) + num_columns - 1)
-            cell_range = f'A{service_index + 2}:{end_col}{service_index + 2}'
+            # Define the range to cover all columns of the updated_row
+            cell_range = f'A{service_index + 2}:BF{service_index + 2}'
 
             # Update the specific row in the Google Sheet
             sheet2.update(cell_range, [updated_row])
