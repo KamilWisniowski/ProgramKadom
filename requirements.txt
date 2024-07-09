@@ -5,3 +5,5 @@ oauth2client
 bcrypt
 pandas
 streamlit_cookies_manager
+dotenv
+os
