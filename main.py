@@ -8,7 +8,7 @@ import bcrypt
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 import time
-
+from google.oauth2.service_account import Credentials
 st.set_page_config(layout="wide")
 # Cache to store fetched clients
 clients_cache = None
@@ -35,17 +35,21 @@ def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
 # Google Sheets authentication
-SERVICE_ACCOUNT_FILE = 'excel.json'
+SERVICE_ACCOUNT_FILE = 'stronabiurokadom-1f99340d7cf7.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
 
 # Authenticate and initialize the Google Sheets client
-credentials = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, SCOPES)
-client = gspread.authorize(credentials)
-sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
-sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
+try:
+    credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    client = gspread.authorize(credentials)
+    sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
+    sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
+except Exception as e:
+    st.error(f"Failed to authenticate or access Google Sheets: {e}")
+    st.stop()
 
 def fetch_clients():
     clients = []
