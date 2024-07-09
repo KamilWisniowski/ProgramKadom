@@ -9,6 +9,7 @@ import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 import time
 from google.oauth2.service_account import Credentials
+import os
 st.set_page_config(layout="wide")
 # Cache to store fetched clients
 clients_cache = None
@@ -35,12 +36,17 @@ def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
 # Google Sheets authentication
-SERVICE_ACCOUNT_FILE = 'stronabiurokadom-e82d7ee6c8fa.json'
+credentials_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+if not credentials_json:
+    st.error('GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.')
+else:
+    credentials = Credentials.from_service_account_info(credentials_json)
+    client = gspread.authorize(credentials)
+SERVICE_ACCOUNT_FILE='stronabiurokadom-e82d7ee6c8fa.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
-
 # Authenticate and initialize the Google Sheets client
 try:
     credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
