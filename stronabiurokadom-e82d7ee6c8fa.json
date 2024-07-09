@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "stronabiurokadom",
+  "private_key_id": "e82d7ee6c8fae7b2c26fcd63d01ec47be8beb418",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDQCkxFrfy/HPw4\nKETbPgPuFb65tJ8iPVbYMo7kjCyjFSlz+MUifQ3RdckG2G7rnGLeju9RJCsvE6qt\nVXFqQnPzPRVHl2r/tbTS48qjLiYfhCR4xgm/f9KaZn0EpxKjcUPYMN1aIyHtYshZ\nGHbARf2pPCLe9ZfZf7OO7o5igewZeojtKFI56kJGIgy//BPOPOk9e1Tmp8WEMUYn\ncX3Yz8euOh5d66+xJu5RJIPnjdw4LSzeBcgZe5PloJa2fYizIrm1ivVYtH2eIAty\neoVkK0aCCS5lOmwvl7ROX0PnkFoCkCr80WCdX6IOWcpsYeJ0nUMW54HrHtJ/njPs\neLDzNDNpAgMBAAECggEADShplIqhjrDVnvOlDzzH4NoNOw+adP7uLDReZ0QaWqIv\nAf+88CZ6pkHN2hn8QfidJDhkGHyyIoMa62WZC8ByNvMpEmMYSF4EtsXjfhigHqQr\n7luQKEV8W3mZ9J5ghmfWg6jrhxTrw2jZBRGQCS8kEP0Vs4ZS+VWjVKnv5XkUJrRF\nEQItp3Kl8eNk/8MOKiWHdyKcrHBZRQHBcZ/LjuyU0hbioZ/oWweIwDdEOIm3raxb\nOFbe9oUUMzI5wXYEjwMoDLDwvalXWMOLpcwAJ3yBOHKtvGM0pltGefzP6HdtpL2j\nFsnHHC0hO98A35QUaaxa4Iv8cvORkVrXHto8EBoRUQKBgQD0h/iaM0IZT8A3tjny\nr1Ih/bRk5hsPXik2pwCyUQ4BS0Ba4hup5A1xmsbG0GkRd4e8Ufx3yZjAVHWVDPof\n7Fm/IATZMy/vnRASqiORyEz5U0Eq4jxzPfHLQ7DoUDM3/kMkzBhiX5MBRtko1Gjt\nvxMvSM+Bl+oL2F/fiofq72IEJQKBgQDZzDBbeBfsZ0K2Jds1fU6bum4TM+791NBi\ny0fGPHYiH0222lXsDPen1kutakct+oOpsePt9tLoy8DHv+KFL01z5HSLCEy43CLI\nlnVXUrPT8tFEO7krDyyu+FH4M0o6J6w1aU3YA5sCLTVcMy5hPR6UNmqzIJ9nyvpc\n7LInJPqM9QKBgQDVmIfhOfD85xrCD1zizZ3yrwgKMq1kaR2a7ZnAKOkQ3EikmmkL\np3bOyyHivF1qsnxQVVUw1VmmdqAWyDUb+XoTZsaVaw7uQMWvaAqV5t7F0qFT8jZX\ne75fjQtUgembeW/xDo4mL9HbBaXe8luNgKAjZ3hKfQYlvqVQQFOlNeDqOQKBgQC/\ngPvwIYufkTgmYuj5gmHRKj7JYbu9sxc8FxPYKaeR30Z9BkPQl6JXEGVgaPeHZSPJ\n3SHWRlYy3Z13xbAOfYYz5efXrAeR7/Yhu7IXgx+duH7q6TyqsOAQRUYF4EtfES0p\nlZsd2iW85zVpCZO5an1twt9U+9VN9Tro5DLNmoU31QKBgQDxct59H0qnzIEQ1ByM\nKRepSt2hVsK85dXLlM8pkGbU1FqECFOfqZWT2JPCSPFoscm6ibFggLQ4QGLpofCd\nizDaaaistLLjkzFBAcjTr3Tw4oqLg5qBcb7EWcfZVAF9ekrTfwenCeLqr1QdTkJp\n6uKgHpPVJPvdm8+KCfwHG7R8FA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "kontoserwisowestronakadom@stronabiurokadom.iam.gserviceaccount.com",
+  "client_id": "113601773513281361455",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/kontoserwisowestronakadom%40stronabiurokadom.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
