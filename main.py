@@ -32,19 +32,16 @@ def load_hashed_passwords():
 
 # Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
-    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
-header = {
-    "authorization": st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-}
-# Google Sheets authentication
-SERVICE_ACCOUNT_FILE = 'stronabiurokadom-30ae75572786.json'
+    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password)
+
+# Autoryzacja do Google Sheets
+SERVICE_ACCOUNT_INFO = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
 
-# Authenticate and initialize the Google Sheets client
-credentials = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, SCOPES)
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_INFO, SCOPES)
 client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
