@@ -10,6 +10,7 @@ from streamlit_cookies_manager import EncryptedCookieManager
 import time
 from google.oauth2.service_account import Credentials
 import os
+import json
 st.set_page_config(layout="wide")
 # Cache to store fetched clients
 clients_cache = None
@@ -40,23 +41,26 @@ credentials_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 if not credentials_json:
     st.error('GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.')
 else:
-    credentials = Credentials.from_service_account_info(credentials_json)
-    client = gspread.authorize(credentials)
-SERVICE_ACCOUNT_FILE='stronabiurokadom-e82d7ee6c8fa.json'
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+    try:
+        # Przekształć zmienną credentials_json na słownik JSON
+        credentials_dict = json.loads(credentials_json)
+        credentials = Credentials.from_service_account_info(credentials_dict)
+        client = gspread.authorize(credentials)
+    except Exception as e:
+        st.error(f"Failed to authenticate or access Google Sheets: {e}")
+        st.stop()
+
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
+
 # Authenticate and initialize the Google Sheets client
 try:
-    credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    client = gspread.authorize(credentials)
     sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
     sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
 except Exception as e:
-    st.error(f"Failed to authenticate or access Google Sheets: {e}")
+    st.error(f"Failed to access Google Sheets: {e}")
     st.stop()
-
 def fetch_clients():
     clients = []
     rows = sheet1.get_all_values()[1:]  # Skip header row
