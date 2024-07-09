@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 import streamlit as st
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
@@ -12,7 +11,7 @@ from streamlit_cookies_manager import EncryptedCookieManager
 import time
 
 st.set_page_config(layout="wide")
-load_dotenv()
+
 
 # Cache to store fetched clients
 clients_cache = None
