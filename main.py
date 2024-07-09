@@ -62,7 +62,7 @@ def client_exists(first_name, last_name, phone):
     return False
 
 # Function to add a new client to the Google Sheet
-def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowośc,Dataslubu,DataUrŻony,imiezony):
+def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony):
     if client_exists(first_name, last_name, phone):
         st.error("Taki klient już istnieje")
         return
@@ -83,7 +83,7 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
         Dataurodzenia,
         Religia,
         Ulica,
-        Miejscowośc,
+        Miejscowość,
         Dataslubu,
         DataUrŻony,
         imiezony
@@ -160,7 +160,7 @@ def edytuj_klienta():
                 Dataurodzenia = st.text_input("Data urodzenia", client_data[12])
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], index=["", "VD", "RK", "EV"].index(client_data[13]))
                 Ulica = st.text_input("Ulica zamieszkania", client_data[14])
-                Miejscowośc = st.text_input("Kod pocztowy i miejscowość", client_data[15])
+                Miejscowość = st.text_input("Kod pocztowy i miejscowość", client_data[15])
                 Dataslubu = st.text_input("Data ślubu", client_data[16])
                 DataUrŻony = st.text_input("Data urodzenia żony", client_data[17])
                 imiezony = st.text_input("Imię żony", client_data[18])
@@ -169,7 +169,7 @@ def edytuj_klienta():
             if atualizuj_klienta:
                 all_clients = fetch_clients()
                 updated_row = [
-                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowośc, Dataslubu, DataUrŻony, imiezony
+                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony
                 ]
 
                 # Update the specific row in the Google Sheet
@@ -389,7 +389,7 @@ def main():
             st.session_state["Dataurodzenia"] = ""
             st.session_state["Religia"] = ""
             st.session_state["Ulica"] = ""
-            st.session_state["Miejscowośc"] = ""
+            st.session_state["Miejscowość"] = ""
             st.session_state["marital_status"] = ""
             st.session_state["Dataslubu"] = ""
             st.session_state["imiezony"] = ""
@@ -413,12 +413,16 @@ def main():
             with st.form(key="client_info_form", border=False):
                 office = st.selectbox("Biuro", ["Przeworsk", "Jarosław"], key="office")
                 first_name = st.text_input("Imię", key="first_name")
+                first_name = first_name.upper()if first_name else None
                 last_name = st.text_input("Nazwisko", key="last_name")
+                last_name = last_name.upper() if last_name else None
                 phone = st.text_input("Nr telefonu", key="phone")
                 email = st.text_input("Email", key="email")
                 bank_account = st.text_input("Nr konta bank", key="bank_account")
                 swift = st.text_input("SWIFT", key="swift")
+                swift = swift.upper() if swift else None
                 tax_office = st.text_input("Finanzamt", key="tax_office")
+                tax_office = tax_office.upper() if tax_office else None
                 steuernummer = st.text_input("Steuernummer", key="steuernummer")
                 tax_id = st.text_input("Nr ID", key="tax_id")
                 if marital_status2 == "żonaty":
@@ -428,12 +432,16 @@ def main():
                     DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
                 Ulica = st.text_input("Ulica zamieszkania klienta", key="Ulica")
-                Miejscowośc = st.text_input("Kod pocztowy i miejscowość", key="Miejscowośc")         
+                Ulica = Ulica.upper() if Ulica else None
+                Miejscowość = st.text_input("Kod pocztowy i miejscowość", key="Miejscowość")  
+                Miejscowość = Miejscowość.upper() if Miejscowość else None
+
                 marital_status = st.text_input("Stan cywilny", key="marital_status",disabled=True)
                 if marital_status2 == "żonaty":
                     st.session_state["marital_status2"] = "żonaty"
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
                     imiezony = st.text_input("Imię żony", key="imiezony")
+                    imiezony = imiezony.upper() if imiezony else None
                 else:
                     Dataslubu = ""
                     imiezony = ""
@@ -443,7 +451,7 @@ def main():
 
 
             if submit_info:
-                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowośc, Dataslubu, DataUrŻony, imiezony)
+                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony)
                 
 
 
