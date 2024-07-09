@@ -35,7 +35,7 @@ def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
 # Google Sheets authentication
-SERVICE_ACCOUNT_FILE = 'stronabiurokadom-1f99340d7cf7.json'
+SERVICE_ACCOUNT_FILE = 'stronabiurokadom-e82d7ee6c8fa.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
