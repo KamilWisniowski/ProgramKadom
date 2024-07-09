@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
@@ -11,8 +10,6 @@ from streamlit_cookies_manager import EncryptedCookieManager
 import time
 
 st.set_page_config(layout="wide")
-
-
 # Cache to store fetched clients
 clients_cache = None
 last_fetch_time = 0
@@ -36,31 +33,22 @@ def load_hashed_passwords():
 # Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
-
-# Google Sheets authentication
-SERVICE_ACCOUNT_INFO = {
-    "type": os.getenv("GOOGLE_SERVICE_ACCOUNT_TYPE"),
-    "project_id": os.getenv("GOOGLE_PROJECT_ID"),
-    "private_key_id": os.getenv("GOOGLE_PRIVATE_KEY_ID"),
-    "private_key": os.getenv("GOOGLE_PRIVATE_KEY").replace('\\n', '\n'),
-    "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
-    "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-    "auth_uri": os.getenv("GOOGLE_AUTH_URI"),
-    "token_uri": os.getenv("GOOGLE_TOKEN_URI"),
-    "auth_provider_x509_cert_url": os.getenv("GOOGLE_AUTH_PROVIDER_X509_CERT_URL"),
-    "client_x509_cert_url": os.getenv("GOOGLE_CLIENT_X509_CERT_URL"),
-    "universe_domain": os.getenv("GOOGLE_UNIVERSE_DOMAIN")
+header = {
+    "authorization": st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
 }
+# Google Sheets authentication
+SERVICE_ACCOUNT_FILE = 'stronabiurokadom-30ae75572786.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
 
 # Authenticate and initialize the Google Sheets client
-credentials = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_INFO, SCOPES)
+credentials = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, SCOPES)
 client = gspread.authorize(credentials)
 sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
 sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
+
 def fetch_clients():
     clients = []
     rows = sheet1.get_all_values()[1:]  # Skip header row
