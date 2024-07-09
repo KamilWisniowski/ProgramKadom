@@ -53,7 +53,6 @@ else:
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
-
 # Authenticate and initialize the Google Sheets client
 try:
     sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
