@@ -694,10 +694,10 @@ def main():
                 # Numerowanie wierszy od 1
                 received_docs_df.index = received_docs_df.index + 1
                 
-
-            st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {len(received_docs_df)})</h3>", unsafe_allow_html=True)
-            received_docs_services_styled = received_docs_df.style.apply(highlight_row_if_status, axis=1)
-            st.dataframe(received_docs_services_styled)
+           
+                st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {len(received_docs_df)})</h3>", unsafe_allow_html=True)
+                received_docs_services_styled = received_docs_df.style.apply(highlight_row_if_status, axis=1)
+                st.dataframe(received_docs_services_styled)
             
             #Klienci z usługami 'DE - Niekompletny zestaw'
             if incomplete_services:
@@ -708,11 +708,11 @@ def main():
                 # Numerowanie wierszy od 1
                 incomplete_services_df.index = incomplete_services_df.index + 1
             
-            st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({len(incomplete_services_df)})</h3>", unsafe_allow_html=True)
-            
-            incomplete_services_styled = incomplete_services_df.style.apply(highlight_row_if_status, axis=1)
-            st.dataframe(incomplete_services_styled)    
-            
+                st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({len(incomplete_services_df)})</h3>", unsafe_allow_html=True)
+                
+                incomplete_services_styled = incomplete_services_df.style.apply(highlight_row_if_status, axis=1)
+                st.dataframe(incomplete_services_styled)    
+                
             #Klienci do wysłania
 
             if uninformed_or_unsent:
@@ -732,8 +732,8 @@ def main():
                 downpayment_services_filtered = [[row[i] for i in selected_columns] for row in downpayment_services]
                 downpayment_services_df = pd.DataFrame(downpayment_services_filtered, columns=["Imię i Nazwisko","Cena", "Status płatności", "Zapłacono", "Forma zapłaty", "Nr. faktury", "Uwagi","Data wystawienia faktury"])
             
-            st.subheader(f"Klienci z zaliczką ({len(downpayment_services_df)})")
-            st.dataframe(downpayment_services_df)
+                st.subheader(f"Klienci z zaliczką ({len(downpayment_services_df)})")
+                st.dataframe(downpayment_services_df)
                 
 
         elif choice == "Cały excel":
