@@ -227,7 +227,7 @@ def edytuj_usluge():
             
             zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[21]) if dodatkowe2 else service_data[21]
             zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[22]) if dodatkowe2 else service_data[22]
-            cena = st.selectbox("Cena", ["", "250", "400"], index=["", "250", "400"].index(service_data[15]) if service_data[15] in ["", "250", "400"] else service_data[15]) if edytujPlatnosc else service_data[15]
+            cena = st.selectbox("Cena", ["", "250", "400", "300"], index=["", "250", "400", "300"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300"] else service_data[15]) if edytujPlatnosc else service_data[15]
             statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else service_data[16])if edytujPlatnosc else service_data[16]
             zaplacono = st.text_input("Zapłacono", service_data[17])if edytujPlatnosc else service_data[17]
             formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))if edytujPlatnosc else service_data[18]
@@ -419,6 +419,7 @@ def main():
                 phone = st.text_input("Nr telefonu", key="phone")
                 email = st.text_input("Email", key="email")
                 bank_account = st.text_input("Nr konta bank", key="bank_account")
+                bank_account = bank_account.upper() if bank_account else None
                 swift = st.text_input("SWIFT", key="swift")
                 swift = swift.upper() if swift else None
                 tax_office = st.text_input("Finanzamt", key="tax_office")
@@ -550,7 +551,7 @@ def main():
                 wKabinie = st.text_input("Kabine", key="wKabinie")
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
-                cena = st.selectbox("Cena", ["", "250", "400"], key="cena")
+                cena = st.selectbox("Cena", ["", "250", "400", "300"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
                 zwrot = ""
