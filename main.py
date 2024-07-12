@@ -694,10 +694,15 @@ def main():
                 # Numerowanie wierszy od 1
                 received_docs_df.index = received_docs_df.index + 1
                 
-           
-                st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {len(received_docs_df)})</h3>", unsafe_allow_html=True)
+                ilosc_otrzymano_dokumenty = len(received_docs_df)
+                st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {ilosc_otrzymano_dokumenty})</h3>", unsafe_allow_html=True)
                 received_docs_services_styled = received_docs_df.style.apply(highlight_row_if_status, axis=1)
                 st.dataframe(received_docs_services_styled)
+            else:
+                ilosc_otrzymano_dokumenty = 0
+                st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {ilosc_otrzymano_dokumenty})</h3>", unsafe_allow_html=True)
+                
+            
             
             #Klienci z usługami 'DE - Niekompletny zestaw'
             if incomplete_services:
@@ -707,11 +712,15 @@ def main():
                 incomplete_services_df = pd.DataFrame(incomplete_services_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Opiekun", "UWAGI", "Konto Elster", "Ogr. ob. podatkowy"])
                 # Numerowanie wierszy od 1
                 incomplete_services_df.index = incomplete_services_df.index + 1
-            
-                st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({len(incomplete_services_df)})</h3>", unsafe_allow_html=True)
                 
+                ilosc_niekompletny_zestaw = len(incomplete_services_df)
+                st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({ilosc_niekompletny_zestaw})</h3>", unsafe_allow_html=True)
                 incomplete_services_styled = incomplete_services_df.style.apply(highlight_row_if_status, axis=1)
                 st.dataframe(incomplete_services_styled)    
+            else:
+                ilosc_niekompletny_zestaw = 0
+                st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({ilosc_niekompletny_zestaw})</h3>", unsafe_allow_html=True)
+
                 
             #Klienci do wysłania
 
@@ -721,9 +730,14 @@ def main():
                 uninformed_or_unsent_filtered = [[row[i] for i in selected_columns] for row in uninformed_or_unsent]
                 uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Poinformowany", "Wysłany", "UWAGI"])
             
-                st.subheader(f"Klienci do wysłania (ilość: {len(uninformed_or_unsent_df)})")    
+                ilosc_niepoinformowany = len(uninformed_or_unsent_df)
+                st.subheader(f"Klienci do wysłania (ilość: {ilosc_niepoinformowany})")    
                 uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
                 st.dataframe(uninformed_or_unsent_styled)
+            else:
+                ilosc_niepoinformowany = 0
+                st.subheader(f"Klienci do wysłania (ilość: {ilosc_niepoinformowany})")    
+
             
             #Klienci z zaliczką
             if downpayment_services:
@@ -732,8 +746,12 @@ def main():
                 downpayment_services_filtered = [[row[i] for i in selected_columns] for row in downpayment_services]
                 downpayment_services_df = pd.DataFrame(downpayment_services_filtered, columns=["Imię i Nazwisko","Cena", "Status płatności", "Zapłacono", "Forma zapłaty", "Nr. faktury", "Uwagi","Data wystawienia faktury"])
             
+                ilosc_klienci_z_zaliczka = len(downpayment_services_df)
                 st.subheader(f"Klienci z zaliczką ({len(downpayment_services_df)})")
                 st.dataframe(downpayment_services_df)
+            else:
+                ilosc_klienci_z_zaliczka = 0
+                st.subheader(f"Klienci z zaliczką ({ilosc_klienci_z_zaliczka})")
                 
 
         elif choice == "Cały excel":
