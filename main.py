@@ -62,7 +62,7 @@ def client_exists(first_name, last_name, phone):
     return False
 
 # Function to add a new client to the Google Sheet
-def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony):
+def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony,nazwisko_zony):
     if client_exists(first_name, last_name, phone):
         st.error("Taki klient już istnieje")
         return
@@ -86,7 +86,8 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
         Miejscowość,
         Dataslubu,
         DataUrŻony,
-        imiezony
+        imiezony,
+        nazwisko_zony
     ]
     sheet1.append_row(new_row)
     st.success("Nowy klient został dodany")
@@ -164,16 +165,17 @@ def edytuj_klienta():
                 Dataslubu = st.text_input("Data ślubu", client_data[16])
                 DataUrŻony = st.text_input("Data urodzenia żony", client_data[17])
                 imiezony = st.text_input("Imię żony", client_data[18])
+                nazwisko_zony = st.text_input("Nazwisko żony (jeśli inne niż męża)", client_data[19])
                 atualizuj_klienta = st.form_submit_button(label='Aktualizuj klienta')
 
             if atualizuj_klienta:
                 all_clients = fetch_clients()
                 updated_row = [
-                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony
+                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony
                 ]
 
                 # Update the specific row in the Google Sheet
-                cell_range = f'A{rows.index(client_data) + 2}:S{rows.index(client_data) + 2}'
+                cell_range = f'A{rows.index(client_data) + 2}:T{rows.index(client_data) + 2}'
                 sheet1.update(cell_range, [updated_row])
 
                 st.success("Dane klienta zostały zaktualizowane")
@@ -395,6 +397,7 @@ def main():
             st.session_state["imiezony"] = ""
             st.session_state["spouse_tax_id"] = ""
             st.session_state["DataUrŻony"] = ""
+            st.session_state["nazwisko_zony"] = ""
         
         # Sekcja dodawania klienta
         if choice == "Dodaj klienta":
@@ -443,16 +446,19 @@ def main():
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
                     imiezony = st.text_input("Imię żony", key="imiezony")
                     imiezony = imiezony.upper() if imiezony else None
+                    nazwisko_zony = st.text_input("Nazwisko żony (jeśli inne niż męża)", key="nazwisko_zony")
+
                 else:
                     Dataslubu = ""
                     imiezony = ""
                     spouse_tax_id = ""
                     DataUrŻony = ""
+                    nazwisko_zony = ""
                 submit_info = st.form_submit_button(label='Dodaj klienta')
 
 
             if submit_info:
-                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony)
+                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony)
                 
 
 
@@ -755,7 +761,7 @@ def main():
                 
 
         elif choice == "Cały excel":
-            st.subheader("Cały arkusz ZP status")
+            st.subheader("Cały arkusz ZP status") 
             df = fetch_full_status_data()
             df_unique = make_unique_columns(df)  # Ensure unique column names
             edited_df = st.data_editor(df_unique)
