@@ -372,7 +372,7 @@ def main():
             st.sidebar.error("Błędna nazwa użytkownika")
 
     if cookies.get("logged_in") == "True":
-        menu = ["Dodaj klienta", "Dodaj usługę", "Podsumowanie", "Cały excel", "Edytuj klienta","Edytuj usługę"]
+        menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta","Edytuj usługę"]
         choice = st.sidebar.selectbox("Menu", menu)
 
 
@@ -582,8 +582,6 @@ def main():
                     kraj_urodzenia = ""
                     narodowosc = ""
 
-                
-
                 if zarobkiwPolsce:
                     zarobkiMezaEuro = st.text_input("Zarobki męża", key="zarobkiMezaEuro")
                     zarobZonyEuro = st.text_input("zarobZonyEuro", key="zarobZonyEuro")            
@@ -673,7 +671,7 @@ def main():
 
 
             uninformed_or_unsent = [s for s in services_data if (s[6] == "Nie" or s[7] == "Nie") and s[1] == "DE - Rozliczono"]
-            downpayment_services = [s for s in services_data if s[16] == "Zaliczka"]
+            downpayment_services = [s for s in services_data if s[16] != "Opłacony"]
 
             # Wyświetlanie podsumowania w kafelkach
             col1, col2, col3 = st.columns(3)
@@ -707,9 +705,7 @@ def main():
             else:
                 ilosc_otrzymano_dokumenty = 0
                 st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {ilosc_otrzymano_dokumenty})</h3>", unsafe_allow_html=True)
-                
-            
-            
+  
             #Klienci z usługami 'DE - Niekompletny zestaw'
             if incomplete_services:
                 # Upewnij się, że liczba kolumn pasuje do danych
@@ -726,10 +722,8 @@ def main():
             else:
                 ilosc_niekompletny_zestaw = 0
                 st.markdown(f"<h3>Klienci z usługami <span style='color: #ed3434; font-weight:700;font-size:30px'> DE - Niekompletny zestaw </span> ({ilosc_niekompletny_zestaw})</h3>", unsafe_allow_html=True)
-
-                
+  
             #Klienci do wysłania
-
             if uninformed_or_unsent:
                 # Upewnij się, że liczba kolumn pasuje do danych
                 selected_columns = [0, 1, 2, 6, 7, 5]  # Indeksy kolumn 1, 2, 3, 5, 7
@@ -743,8 +737,7 @@ def main():
             else:
                 ilosc_niepoinformowany = 0
                 st.subheader(f"Klienci do wysłania (ilość: {ilosc_niepoinformowany})")    
-
-            
+ 
             #Klienci z zaliczką
             if downpayment_services:
                 # Upewnij się, że liczba kolumn pasuje do danych
@@ -753,12 +746,11 @@ def main():
                 downpayment_services_df = pd.DataFrame(downpayment_services_filtered, columns=["Imię i Nazwisko","Cena", "Status płatności", "Zapłacono", "Forma zapłaty", "Nr. faktury", "Uwagi","Data wystawienia faktury"])
             
                 ilosc_klienci_z_zaliczka = len(downpayment_services_df)
-                st.subheader(f"Klienci z zaliczką ({len(downpayment_services_df)})")
+                st.subheader(f"Klienci z zaliczką lub z statusem nieopłacono ({len(downpayment_services_df)})")
                 st.dataframe(downpayment_services_df)
             else:
                 ilosc_klienci_z_zaliczka = 0
-                st.subheader(f"Klienci z zaliczką ({ilosc_klienci_z_zaliczka})")
-                
+                st.subheader(f"Klienci z zaliczką lub z statusem nieopłacono ({ilosc_klienci_z_zaliczka})")         
 
         elif choice == "Cały excel":
             st.subheader("Cały arkusz ZP status") 
