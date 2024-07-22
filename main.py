@@ -271,7 +271,7 @@ def edytuj_usluge():
             
             kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
             ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
-            aktualny_stan_zamieszkania = st.text_input("Aktualny stan zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
+            aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
             miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
             kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
             narodowosc = st.text_input("Narodowość", service_data[53]) if pola_ogr_ob_podat else service_data[53]
@@ -582,7 +582,7 @@ def main():
                 ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy",disabled=True)
                 
                 if ogrObPodatkowy == "Tak":
-                    aktualny_stan_zamieszkania = st.text_input("Aktualny stan zamieszkania", key="aktualny_stan_zamieszkania")
+                    aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", key="aktualny_stan_zamieszkania")
                     miejsce_urodzenia = st.text_input("Miejscowość urodzenia", key="miejsce_urodzenia")
                     kraj_urodzenia = st.text_input("Kraj urodzenia", key="kraj_urodzenia")
                     narodowosc = st.text_input("Narodowość", key="narodowosc")                 
