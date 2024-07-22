@@ -453,8 +453,8 @@ def main():
                     imiezony = st.text_input("Imię małżonka", key="imiezony")
                     imiezony = imiezony.upper() if imiezony else None
                     nazwisko_zony = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="nazwisko_zony")
-                    UlicaMalzona = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="UlicaMalzona")
-                    MiejscowoscMalzonka = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="MiejscowoscMalzonka")
+                    UlicaMalzona = st.text_input("Ulica zamieszkania małżonka (jeśli inne niż podatnika)", key="UlicaMalzona")
+                    MiejscowoscMalzonka = st.text_input("Miejscowość zamieszkania małżonka (jeśli inne niż podatnika)", key="MiejscowoscMalzonka")
 
                 else:
                     Dataslubu = ""
