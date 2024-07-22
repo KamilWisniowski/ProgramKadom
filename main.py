@@ -62,7 +62,7 @@ def client_exists(first_name, last_name, phone):
     return False
 
 # Function to add a new client to the Google Sheet
-def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony,nazwisko_zony):
+def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony,nazwisko_zony,UlicaMalzona,MiejscowoscMalzonka):
     if client_exists(first_name, last_name, phone):
         st.error("Taki klient już istnieje")
         return
@@ -87,7 +87,9 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
         Dataslubu,
         DataUrŻony,
         imiezony,
-        nazwisko_zony
+        nazwisko_zony,
+        UlicaMalzona,
+        MiejscowoscMalzonka
     ]
     sheet1.append_row(new_row)
     st.success("Nowy klient został dodany")
@@ -166,12 +168,14 @@ def edytuj_klienta():
                 DataUrŻony = st.text_input("Data urodzenia małżonka", client_data[17])
                 imiezony = st.text_input("Imię małżonka", client_data[18])
                 nazwisko_zony = st.text_input("Nazwisko małżonka (jeśli inne niż podatnikaa)", client_data[19])
+                UlicaMalzona = st.text_input("Ulica zamieszkania małżonka (jeśli inne niż podatnikaa)", client_data[20])
+                MiejscowoscMalzonka = st.text_input("Miejscowość zamieszkania małżonka (jeśli inne niż podatnikaa)", client_data[21])
                 atualizuj_klienta = st.form_submit_button(label='Aktualizuj klienta')
 
             if atualizuj_klienta:
                 all_clients = fetch_clients()
                 updated_row = [
-                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony
+                    first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony,UlicaMalzona,MiejscowoscMalzonka
                 ]
 
                 # Update the specific row in the Google Sheet
@@ -398,6 +402,8 @@ def main():
             st.session_state["spouse_tax_id"] = ""
             st.session_state["DataUrŻony"] = ""
             st.session_state["nazwisko_zony"] = ""
+            st.session_state["UlicaMalzona"] = ""
+            st.session_state["MiejscowoscMalzonka"] = ""
         
         # Sekcja dodawania klienta
         if choice == "Dodaj klienta":
@@ -447,6 +453,8 @@ def main():
                     imiezony = st.text_input("Imię małżonka", key="imiezony")
                     imiezony = imiezony.upper() if imiezony else None
                     nazwisko_zony = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="nazwisko_zony")
+                    UlicaMalzona = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="UlicaMalzona")
+                    MiejscowoscMalzonka = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="MiejscowoscMalzonka")
 
                 else:
                     Dataslubu = ""
@@ -454,11 +462,13 @@ def main():
                     spouse_tax_id = ""
                     DataUrŻony = ""
                     nazwisko_zony = ""
+                    UlicaMalzona = ""
+                    MiejscowoscMalzonka = ""
                 submit_info = st.form_submit_button(label='Dodaj klienta')
 
 
             if submit_info:
-                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony)
+                add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony,UlicaMalzona,MiejscowoscMalzonka)
                 
 
 
