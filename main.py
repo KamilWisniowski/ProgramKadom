@@ -163,9 +163,9 @@ def edytuj_klienta():
                 Ulica = st.text_input("Ulica zamieszkania", client_data[14])
                 Miejscowość = st.text_input("Kod pocztowy i miejscowość", client_data[15])
                 Dataslubu = st.text_input("Data ślubu", client_data[16])
-                DataUrŻony = st.text_input("Data urodzenia żony", client_data[17])
-                imiezony = st.text_input("Imię żony", client_data[18])
-                nazwisko_zony = st.text_input("Nazwisko żony (jeśli inne niż męża)", client_data[19])
+                DataUrŻony = st.text_input("Data urodzenia małżonka", client_data[17])
+                imiezony = st.text_input("Imię małżonka", client_data[18])
+                nazwisko_zony = st.text_input("Nazwisko małżonka (jeśli inne niż podatnikaa)", client_data[19])
                 atualizuj_klienta = st.form_submit_button(label='Aktualizuj klienta')
 
             if atualizuj_klienta:
@@ -429,10 +429,10 @@ def main():
                 tax_office = tax_office.upper() if tax_office else None
                 steuernummer = st.text_input("Steuernummer", key="steuernummer")
                 tax_id = st.text_input("Nr ID", key="tax_id")
-                if marital_status2 == "żonaty":
+                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
                     spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
                 Dataurodzenia = st.text_input("Data urodzenia podatnika", key="Dataurodzenia")
-                if marital_status2 == "żonaty":
+                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
                     DataUrŻony = st.text_input("Data urodzenia małżonka", key="DataUrŻony")
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
                 Ulica = st.text_input("Ulica zamieszkania podatnika", key="Ulica")
@@ -441,7 +441,7 @@ def main():
                 Miejscowość = Miejscowość.upper() if Miejscowość else None
 
                 marital_status = st.text_input("Stan cywilny", key="marital_status",disabled=True)
-                if marital_status2 == "żonaty":
+                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
                     st.session_state["marital_status2"] = "żonaty"
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
                     imiezony = st.text_input("Imię małżonka", key="imiezony")
@@ -543,7 +543,7 @@ def main():
 
             with st.form(key="status_form", border=False):
                 
-                klient = st.selectbox("Klient", all_clients, key="klient")
+                klient = st.selectbox("Podatnik", all_clients, key="klient")
                 statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
                 rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
@@ -568,14 +568,14 @@ def main():
                 else:
                     nrfaktury = ""
                     dataWystawieniaFaktury = ""
-                kontoElster = st.selectbox("kontoElster", ["Nie", "Tak"], key="kontoElster")                  
-                ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], key="ogrObPodatkowy",disabled=True)
+                kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], key="kontoElster")                  
+                ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy",disabled=True)
                 
                 if ogrObPodatkowy == "Tak":
-                    aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", key="aktualny_stan_zamieszkania")
-                    miejsce_urodzenia = st.text_input("miejsce_urodzenia", key="miejsce_urodzenia")
-                    kraj_urodzenia = st.text_input("kraj_urodzenia", key="kraj_urodzenia")
-                    narodowosc = st.text_input("narodowosc", key="narodowosc")                 
+                    aktualny_stan_zamieszkania = st.text_input("Aktualny stan zamieszkania", key="aktualny_stan_zamieszkania")
+                    miejsce_urodzenia = st.text_input("Miejscowość urodzenia", key="miejsce_urodzenia")
+                    kraj_urodzenia = st.text_input("Kraj urodzenia", key="kraj_urodzenia")
+                    narodowosc = st.text_input("Narodowość", key="narodowosc")                 
                 else:
                     aktualny_stan_zamieszkania = ""
                     miejsce_urodzenia = ""
@@ -583,8 +583,8 @@ def main():
                     narodowosc = ""
 
                 if zarobkiwPolsce:
-                    zarobkiMezaEuro = st.text_input("Zarobki męża", key="zarobkiMezaEuro")
-                    zarobZonyEuro = st.text_input("zarobZonyEuro", key="zarobZonyEuro")            
+                    zarobkiMezaEuro = st.text_input("Zarobki podatnika", key="zarobkiMezaEuro")
+                    zarobZonyEuro = st.text_input("Zarobki małżonka", key="zarobZonyEuro")            
                 else:
                     zarobkiMezaEuro = ""
                     zarobZonyEuro = ""
