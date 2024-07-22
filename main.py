@@ -206,7 +206,7 @@ def edytuj_usluge():
             st.form_submit_button(label='Załaduj')
 
         with st.form(key="status_form"):
-            klient = st.selectbox("Klient", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
+            klient = st.selectbox("Podatnik", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
             statusDE = st.selectbox(
                 "Status DE", 
                 ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
@@ -265,12 +265,12 @@ def edytuj_usluge():
             kościelny3 = st.text_input("kościelny3", service_data[46])if EdytujPit else service_data[46]
             kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[47])if EdytujPit else service_data[47]
             
-            kontoElster = st.selectbox("konto Elster", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
-            ogrObPodatkowy = st.selectbox("ogrObPodatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
-            aktualny_stan_zamieszkania = st.text_input("aktualny_stan_zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
-            miejsce_urodzenia = st.text_input("miejsce_urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
-            kraj_urodzenia = st.text_input("kraj_urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
-            narodowosc = st.text_input("narodowosc", service_data[53]) if pola_ogr_ob_podat else service_data[53]
+            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
+            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
+            aktualny_stan_zamieszkania = st.text_input("Aktualny stan zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
+            miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
+            kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
+            narodowosc = st.text_input("Narodowość", service_data[53]) if pola_ogr_ob_podat else service_data[53]
             
             aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
 
@@ -431,11 +431,11 @@ def main():
                 tax_id = st.text_input("Nr ID", key="tax_id")
                 if marital_status2 == "żonaty":
                     spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
-                Dataurodzenia = st.text_input("Data urodzenia klienta", key="Dataurodzenia")
+                Dataurodzenia = st.text_input("Data urodzenia podatnika", key="Dataurodzenia")
                 if marital_status2 == "żonaty":
-                    DataUrŻony = st.text_input("Data ur. żony", key="DataUrŻony")
+                    DataUrŻony = st.text_input("Data urodzenia małżonka", key="DataUrŻony")
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
-                Ulica = st.text_input("Ulica zamieszkania klienta", key="Ulica")
+                Ulica = st.text_input("Ulica zamieszkania podatnika", key="Ulica")
                 Ulica = Ulica.upper() if Ulica else None
                 Miejscowość = st.text_input("Kod pocztowy i miejscowość", key="Miejscowość")  
                 Miejscowość = Miejscowość.upper() if Miejscowość else None
@@ -444,9 +444,9 @@ def main():
                 if marital_status2 == "żonaty":
                     st.session_state["marital_status2"] = "żonaty"
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
-                    imiezony = st.text_input("Imię żony", key="imiezony")
+                    imiezony = st.text_input("Imię małżonka", key="imiezony")
                     imiezony = imiezony.upper() if imiezony else None
-                    nazwisko_zony = st.text_input("Nazwisko żony (jeśli inne niż męża)", key="nazwisko_zony")
+                    nazwisko_zony = st.text_input("Nazwisko małżonka (jeśli inne niż podatnika)", key="nazwisko_zony")
 
                 else:
                     Dataslubu = ""
