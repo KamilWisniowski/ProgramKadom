@@ -271,12 +271,19 @@ def edytuj_usluge():
             kościelny3 = st.text_input("kościelny3", service_data[46])if EdytujPit else service_data[46]
             kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[47])if EdytujPit else service_data[47]
             
-            KlasaPITmałżonka = st.text_input("klasaPIT3", service_data[54])if CzyJestPitMałżonka else service_data[54]
-            Bruttomałżonka = st.text_input("brutto3", service_data[55])if CzyJestPitMałżonka else service_data[55]
-            Podatekmałżonka = st.text_input("podatek3", service_data[56])if CzyJestPitMałżonka else service_data[56]
-            Dopłatamałżonka = st.text_input("dopłata3", service_data[57])if CzyJestPitMałżonka else service_data[57]
-            Kościelnymałżonka = st.text_input("kościelny3", service_data[58])if CzyJestPitMałżonka else service_data[58]
-            Kurzarbeitergeldmałżonka = st.text_input("kurzarbeitergeld3", service_data[59])if CzyJestPitMałżonka else service_data[59]
+            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
+            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
+            aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
+            miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
+            kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
+            narodowosc = st.text_input("Narodowość", service_data[53]) if pola_ogr_ob_podat else service_data[53]
+            
+            KlasaPITmałżonka = st.text_input("KlasaPITmałżonka", service_data[54])if CzyJestPitMałżonka else service_data[54]
+            Bruttomałżonka = st.text_input("Bruttomałżonka", service_data[55])if CzyJestPitMałżonka else service_data[55]
+            Podatekmałżonka = st.text_input("Podatekmałżonka", service_data[56])if CzyJestPitMałżonka else service_data[56]
+            Dopłatamałżonka = st.text_input("Dopłatamałżonka", service_data[57])if CzyJestPitMałżonka else service_data[57]
+            Kościelnymałżonka = st.text_input("Kościelnymałżonka", service_data[58])if CzyJestPitMałżonka else service_data[58]
+            Kurzarbeitergeldmałżonka = st.text_input("Kurzarbeitergeldmałżonka", service_data[59])if CzyJestPitMałżonka else service_data[59]
             
             Nr22malzonka = st.text_input("Nr22malzonka", service_data[60])if CzyJestPitMałżonka else service_data[60]
             Nr23malzonka = st.text_input("Nr23malzonka", service_data[61])if CzyJestPitMałżonka else service_data[61]
@@ -285,14 +292,6 @@ def edytuj_usluge():
             Nr27malzonka = st.text_input("Nr27malzonka", service_data[64])if CzyJestPitMałżonka else service_data[64]
             Pracodawcamalzonka = st.text_input("Pracodawcamalzonka", service_data[65])if CzyJestPitMałżonka else service_data[65]
             Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66])if CzyJestPitMałżonka else service_data[66]
-            
-            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
-            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
-            aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
-            miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
-            kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
-            narodowosc = st.text_input("Narodowość", service_data[53]) if pola_ogr_ob_podat else service_data[53]
-            
             Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[66])if Bezrobocie else service_data[66]
             Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[67])if Bezrobocie else service_data[67]
             aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
