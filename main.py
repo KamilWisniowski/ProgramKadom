@@ -548,7 +548,7 @@ def main():
             if st.button("Wyczyść"):
                 reset_service_form()
             st.subheader("Zaznacz odpowiednie opcje")
-            with st.form(key="status_form", border=False):
+            with st.form(border=False):
                 all_clients = fetch_clients()
                 ogrObPodatkowy2 = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy2")
                 zarobkiwPolsce = st.checkbox("Zaznacz, aby dodać zarobki w Polsce", key="zarobkiwPolsce")
