@@ -100,7 +100,7 @@ def service_exists(klient, statusDE, rok):
             return True
     return False
 # Function to add a new service to the Google Sheet
-def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc):
+def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka):
     if service_exists(klient, statusDE, rok):
         st.markdown(f'<span style="border-radius:10px;padding:18px;background-color:rgba(255, 43, 43, 0.09);">Usługa dla klienta:<span style="font-size:18px; font-weight:bold;color:lightcoral"> {klient} </span>o statusie: <span style="font-size:18px; font-weight:bold;"> {statusDE}</span> za rok:<span style="font-size:18px; font-weight:bold;">  {rok}</span> już ISTNIEJE', unsafe_allow_html=True)
         return
@@ -114,7 +114,7 @@ def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fa
         wyslany,
         fahrkosten,
         ubernachtung,
-        h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc
+        h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka
     ]
     sheet2.append_row(new_row)
     st.success("Nowa usługa została dodana")
@@ -231,8 +231,8 @@ def edytuj_usluge():
             anUndAb = st.text_input("Ab und an", service_data[13])if dodatkowe2 else service_data[13]
             dzieci = st.text_area("Dzieci", service_data[14])if dodatkowe2 else service_data[14]           
             
-            zarobkiMezaEuro = st.text_input("Zarobki męża", service_data[21]) if dodatkowe2 else service_data[21]
-            zarobZonyEuro = st.text_input("zarobZonyEuro", service_data[22]) if dodatkowe2 else service_data[22]
+            zarobkiMezaEuro = st.text_input("Zarobki podatnika", service_data[21]) if dodatkowe2 else service_data[21]
+            zarobZonyEuro = st.text_input("Zarobi małżonka", service_data[22]) if dodatkowe2 else service_data[22]
             cena = st.selectbox("Cena", ["", "250", "400", "300"], index=["", "250", "400", "300"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300"] else service_data[15]) if edytujPlatnosc else service_data[15]
             statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else service_data[16])if edytujPlatnosc else service_data[16]
             zaplacono = st.text_input("Zapłacono", service_data[17])if edytujPlatnosc else service_data[17]
@@ -269,6 +269,13 @@ def edytuj_usluge():
             kościelny3 = st.text_input("kościelny3", service_data[46])if EdytujPit else service_data[46]
             kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[47])if EdytujPit else service_data[47]
             
+            KlasaPITmałżonka = st.text_input("klasaPIT3", service_data[54])if EdytujPit else service_data[54]
+            Bruttomałżonka = st.text_input("brutto3", service_data[55])if EdytujPit else service_data[55]
+            Podatekmałżonka = st.text_input("podatek3", service_data[56])if EdytujPit else service_data[56]
+            Dopłatamałżonka = st.text_input("dopłata3", service_data[57])if EdytujPit else service_data[57]
+            Kościelnymałżonka = st.text_input("kościelny3", service_data[58])if EdytujPit else service_data[58]
+            Kurzarbeitergeldmałżonka = st.text_input("kurzarbeitergeld3", service_data[59])if EdytujPit else service_data[59]
+            
             kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
             ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
             aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
@@ -280,7 +287,7 @@ def edytuj_usluge():
 
         if aktualizuj_usluge:
             updated_row = [
-                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc
+                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka
             ]
 
             # Define the range to cover all columns of the updated_row
@@ -527,7 +534,12 @@ def main():
             st.session_state["miejsce_urodzenia"] = ""
             st.session_state["kraj_urodzenia"] = ""
             st.session_state["narodowosc"] = ""
-
+            st.session_state["KlasaPITmałżonka"] = ""
+            st.session_state["Bruttomałżonka"] = ""
+            st.session_state["Podatekmałżonka"] = ""
+            st.session_state["Dopłatamałżonka"] = ""
+            st.session_state["Kościelnymałżonka"] = ""
+            st.session_state["Kurzarbeitergeldmałżonka"] = ""
         # Sekcja dodawania usługi
         if choice == "Dodaj usługę":
             st.subheader("Dodaj nową usługę")
@@ -544,6 +556,7 @@ def main():
             CzyJestPit1 = st.checkbox("PIT nr. 1 (Zaznaczyć, jeżeli klient posiada) ", key="CzyJestPit1")
             CzyJestPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit2")
             CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
+            CzyJestPitMałżonka = st.checkbox("PIT małżonka (Zaznaczyć, jeżeli istnieje)", key="CzyJestPitMałżonka")
             formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
 
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
@@ -659,12 +672,27 @@ def main():
                     dopłata3 = ""
                     kościelny3 = ""
                     kurzarbeitergeld3 = ""
+                
+                if CzyJestPitMałżonka:   
+                    KlasaPITmałżonka = st.text_input("KlasaPITmałżonka", key="KlasaPITmałżonka")
+                    Bruttomałżonka = st.text_input("Bruttomałżonka", key="Bruttomałżonka")
+                    Podatekmałżonka = st.text_input("Podatekmałżonka", key="Podatekmałżonka")
+                    Dopłatamałżonka = st.text_input("Dopłatamałżonka", key="Dopłatamałżonka")
+                    Kościelnymałżonka = st.text_input("Kościelnymałżonka", key="Kościelnymałżonka")
+                    Kurzarbeitergeldmałżonka = st.text_input("Kurzarbeitergeldmałżonka", key="Kurzarbeitergeldmałżonka")
+                else:
+                    KlasaPITmałżonka = ""
+                    Bruttomałżonka = ""
+                    Podatekmałżonka = ""
+                    Dopłatamałżonka = ""
+                    Kościelnymałżonka = ""
+                    Kurzarbeitergeldmałżonka = ""
                 submit_status = st.form_submit_button(label='Dodaj usługę')
             if submit_status:
                 if not klient or not statusDE or not rok:
                     st.error("Podanie danych klienta, Statusu DE oraz roku rozliczenia jest wymagane")
                 else:
-                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc)
+                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka)
                 
         elif choice == "Podsumowanie":
             st.subheader("Podsumowanie")
