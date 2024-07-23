@@ -548,17 +548,17 @@ def main():
             if st.button("Wyczyść"):
                 reset_service_form()
             st.subheader("Zaznacz odpowiednie opcje")
-
-            all_clients = fetch_clients()
-            ogrObPodatkowy2 = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy2")
-            zarobkiwPolsce = st.checkbox("Zaznacz, aby dodać zarobki w Polsce", key="zarobkiwPolsce")
-            dodatkowe = st.checkbox("Zaznacz, aby dodać pola 22, 23, 25, 26, 27, pracodawca, chorobowe", key="dodatkowe")
-            CzyJestPit1 = st.checkbox("PIT nr. 1 (Zaznaczyć, jeżeli klient posiada) ", key="CzyJestPit1")
-            CzyJestPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit2")
-            CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
-            CzyJestPitMałżonka = st.checkbox("PIT małżonka (Zaznaczyć, jeżeli istnieje)", key="CzyJestPitMałżonka")
-            formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
-
+            with st.form(key="status_form", border=False):
+                all_clients = fetch_clients()
+                ogrObPodatkowy2 = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy2")
+                zarobkiwPolsce = st.checkbox("Zaznacz, aby dodać zarobki w Polsce", key="zarobkiwPolsce")
+                dodatkowe = st.checkbox("Zaznacz, aby dodać pola 22, 23, 25, 26, 27, pracodawca, chorobowe", key="dodatkowe")
+                CzyJestPit1 = st.checkbox("PIT nr. 1 (Zaznaczyć, jeżeli klient posiada) ", key="CzyJestPit1")
+                CzyJestPit2 = st.checkbox("PIT nr. 2 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit2")
+                CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
+                CzyJestPitMałżonka = st.checkbox("PIT małżonka (Zaznaczyć, jeżeli istnieje)", key="CzyJestPitMałżonka")
+                formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
+            st.form_submit_button(label='Załaduj pola')
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
             st.session_state["formaZaplaty"] = formaZaplaty2
              
