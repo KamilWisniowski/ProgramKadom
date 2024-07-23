@@ -558,7 +558,8 @@ def main():
                 CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
                 CzyJestPitMałżonka = st.checkbox("PIT małżonka (Zaznaczyć, jeżeli istnieje)", key="CzyJestPitMałżonka")
                 formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
-            st.form_submit_button(label='Załaduj pola')
+                st.form_submit_button(label='Załaduj pola')
+            
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
             st.session_state["formaZaplaty"] = formaZaplaty2
              
