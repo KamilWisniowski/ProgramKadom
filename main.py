@@ -129,8 +129,7 @@ def edytuj_klienta():
     all_clients = fetch_clients()
 
     # Pole do filtrowania i wyboru klientów
-    filter_input = st.text_input("Filtruj klientów")
-    filtered_clients = [client for client in all_clients if filter_input.lower() in client.lower()]
+    filtered_clients = [client for client in all_clients]
 
     klient = st.selectbox("Wybierz klienta do edycji", filtered_clients, key="selected_client")
 
@@ -200,8 +199,8 @@ def edytuj_usluge():
         service_index = service_options.index(service_index)
         st.subheader(f"Edycja usługi: {service_options[service_index]}")
         service_data = all_services[service_index]
-        with st.form(key="status_form2"):
         
+        with st.form(key="status_form2"):
             edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
             dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
             EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
@@ -218,6 +217,7 @@ def edytuj_usluge():
                 ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
                 index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
             )
+            
             rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else service_data[2]) if daneKontaktowe else service_data[2]
             zwrot = st.text_input("Zwrot", service_data[3])
             opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0) if daneKontaktowe else service_data[4]
@@ -235,7 +235,7 @@ def edytuj_usluge():
             
             zarobkiMezaEuro = st.text_input("Zarobki podatnika", service_data[21]) if dodatkowe2 else service_data[21]
             zarobZonyEuro = st.text_input("Zarobi małżonka", service_data[22]) if dodatkowe2 else service_data[22]
-            cena = st.selectbox("Cena", ["", "250", "400", "300"], index=["", "250", "400", "300"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300"] else service_data[15]) if edytujPlatnosc else service_data[15]
+            cena = st.selectbox("Cena", ["", "250", "400", "300","200"], index=["", "250", "400", "300","200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300","200"] else service_data[15]) if edytujPlatnosc else service_data[15]
             statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else service_data[16])if edytujPlatnosc else service_data[16]
             zaplacono = st.text_input("Zapłacono", service_data[17])if edytujPlatnosc else service_data[17]
             formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))if edytujPlatnosc else service_data[18]
@@ -569,7 +569,7 @@ def main():
             if st.button("Wyczyść"):
                 reset_service_form()
             st.subheader("Zaznacz odpowiednie opcje")
-            with st.form(key="pola_form", border=False):
+            with st.form(key="pola_form"):
                 all_clients = fetch_clients()
                 ogrObPodatkowy2 = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy2")
                 zarobkiwPolsce = st.checkbox("Zaznacz, aby dodać zarobki w Polsce", key="zarobkiwPolsce")
@@ -579,9 +579,9 @@ def main():
                 CzyJestPit3 = st.checkbox("PIT nr. 3 (Zaznaczyć, jeżeli klient posiada)", key="CzyJestPit3")
                 CzyJestPitMałżonka = st.checkbox("PIT małżonka (Zaznaczyć, jeżeli istnieje)", key="CzyJestPitMałżonka")
                 formaZaplaty2 = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], key="formaZaplaty2")
-                bezrobocie = st.selectbox("Czy sa dokumenty BEZROBOCIE", key="bezrobocie")
+                bezrobocie = st.checkbox("Czy sa dokumenty BEZROBOCIE", key="bezrobocie")
                 st.form_submit_button(label='Załaduj pola')
-            
+
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
             st.session_state["formaZaplaty"] = formaZaplaty2
              
@@ -603,7 +603,7 @@ def main():
                 wKabinie = st.text_input("Kabine", key="wKabinie")
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
-                cena = st.selectbox("Cena", ["", "250", "400", "300"], key="cena")
+                cena = st.selectbox("Cena", ["", "250", "400", "300","200"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
                 zwrot = ""
