@@ -178,7 +178,7 @@ def edytuj_klienta():
                 ]
 
                 # Update the specific row in the Google Sheet
-                cell_range = f'A{rows.index(client_data) + 2}:T{rows.index(client_data) + 2}'
+                cell_range = f'A{rows.index(client_data) + 2}:V{rows.index(client_data) + 2}'
                 sheet1.update(cell_range, [updated_row])
 
                 st.success("Dane klienta zostały zaktualizowane")
@@ -302,7 +302,7 @@ def edytuj_usluge():
             ]
 
             # Define the range to cover all columns of the updated_row
-            cell_range = f'A{service_index + 2}:BB{service_index + 2}'
+            cell_range = f'A{service_index + 2}:BQ{service_index + 2}'
 
             # Update the specific row in the Google Sheet
             sheet2.update(cell_range, [updated_row])
