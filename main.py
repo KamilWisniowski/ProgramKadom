@@ -133,7 +133,7 @@ def edytuj_klienta():
 
     klient = st.selectbox("Wybierz klienta do edycji", filtered_clients, key="selected_client")
 
-    if klient:
+    if len(klient)>2:
         st.subheader(f"Edycja klienta: {klient}")
 
         # Fetch client data based on the selected client
@@ -569,15 +569,14 @@ def main():
             st.subheader("Dodaj nową usługę")
 
             # Przycisk do czyszczenia formularza
-            if st.button("Wyczyść"):
+            if st.button("Wyczyść wszystkie pola"):
                 reset_service_form()
-            
+            all_clients = fetch_clients()
+            st.subheader("Zaznacz odpowiednie opcje")
+
             kamil = st.checkbox("Zaznaczyć aby wyświetlić pola rozszerzone (KAMIL) ", key="kamil")
 
-            st.subheader("Zaznacz odpowiednie opcje")
             with st.form(key="pola_form"):
-                all_clients = fetch_clients()
-                klient2 = st.selectbox("Podatnik", all_clients, key="klient2")
 
                 ogrObPodatkowy2 = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], key="ogrObPodatkowy2")
                 if kamil:
@@ -599,16 +598,15 @@ def main():
                 delegacje = st.checkbox("Czy są delegacje zagraniczne", key="delegacje")
                 num_delegacje = st.number_input("Ile krajów? (delegacje zagraniczne)", min_value=1, max_value=10, step=1, key="num_delegacje")
 
-                zaladuj_pola=st.form_submit_button(label='Załaduj pola')
+                st.form_submit_button(label='Załaduj pola')
             
         
             st.session_state["ogrObPodatkowy"] = ogrObPodatkowy2
             st.session_state["formaZaplaty"] = formaZaplaty2
-            st.session_state["klient"] = klient2
             
             st.subheader("Wypełnij dane usługi")
             with st.form(key="status_form", border=False):
-                klient = st.text_input("Podatnik", key="klient", disabled=True)
+                klient = st.selectbox("Podatnik", all_clients, key="klient2")
                 statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
                 rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
