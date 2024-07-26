@@ -93,15 +93,15 @@ def add_client(first_name, last_name, office, phone, email, marital_status, bank
     ]
     sheet1.append_row(new_row)
     st.success("Nowy klient został dodany")
-def service_exists(klient, statusDE, rok):
+def service_exists(klient, rok):
     rows = sheet2.get_all_values()[1:]  # Skip header row
     for row in rows:
-        if row[0] == klient and row[1] == statusDE and row[2] == str(rok):
+        if row[0] == klient and row[2] == str(rok):
             return True
     return False
 # Function to add a new service to the Google Sheet
 def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne):
-    if service_exists(klient, statusDE, rok):
+    if service_exists(klient, rok):
         st.markdown(f'<span style="border-radius:10px;padding:18px;background-color:rgba(255, 43, 43, 0.09);">Usługa dla klienta:<span style="font-size:18px; font-weight:bold;color:lightcoral"> {klient} </span>o statusie: <span style="font-size:18px; font-weight:bold;"> {statusDE}</span> za rok:<span style="font-size:18px; font-weight:bold;">  {rok}</span> już ISTNIEJE', unsafe_allow_html=True)
         return
     new_row = [
