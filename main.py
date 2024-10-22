@@ -377,7 +377,7 @@ def main():
 
     # Opcja logowania
     hashed_passwords = load_hashed_passwords()
-    usernames = ["kkamil", "bbeata"]  # Lista nazw użytkowników
+    usernames = ["kkamil", "bbeata", "kkasia"]  # Lista nazw użytkowników
     username = st.sidebar.text_input("Nazwa użytkownika")
     password = st.sidebar.text_input("Hasło", type="password")
 
