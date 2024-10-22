@@ -32,6 +32,11 @@ def load_hashed_passwords():
 
 # Funkcja do weryfikacji hasła
 def verify_password(stored_password, provided_password):
+    # Zakodowanie zapisanego hasła na 'bytes'
+    if isinstance(stored_password, str):
+        stored_password = stored_password.encode('utf-8')
+
+    # Porównanie hasła z jego haszem
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password)
 
 # Autoryzacja do Google Sheets
