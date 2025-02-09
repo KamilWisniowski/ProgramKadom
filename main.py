@@ -225,7 +225,7 @@ def edytuj_usluge():
                 index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
             )
             
-            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], index=['2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2023', '2022', '2021', '2020', '2019', '2018'] else service_data[2]) if daneKontaktowe else service_data[2]
+            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else service_data[2]) if daneKontaktowe else service_data[2]
             zwrot = st.text_input("Zwrot", service_data[3])
             opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0) if daneKontaktowe else service_data[4]
             uwagi = st.text_area("Uwagi", service_data[5])
@@ -613,7 +613,7 @@ def main():
             with st.form(key="status_form", border=False):
                 klient = st.selectbox("Podatnik", all_clients, key="klient2")
                 statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
-                rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
+                rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
                 uwagi = st.text_area("Uwagi", key="uwagi")
                 poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], key="poinformowany")

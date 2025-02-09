@@ -59,7 +59,7 @@ if __name__ == "__main__":
         with st.form(key="status_form"):
             klient = st.selectbox("Podatnik", all_clients, key="klient")
             statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
-            rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
+            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
 
             delegacje_zagraniczne = []
             if delegacje:

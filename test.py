@@ -354,7 +354,7 @@ def main():
                 
                 klient = st.selectbox("Klient", all_clients, key="klient")
                 statusDE = st.selectbox("Status DE", ["", "DE - Otrzymano dokumenty", "DE - Rozliczono", "DE - Niekompletny zestaw"], key="statusDE")
-                rok = st.selectbox("Rok", ['2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
+                rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
                 uwagi = st.text_area("Uwagi", key="uwagi")
                 poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], key="poinformowany")
