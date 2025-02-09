@@ -503,7 +503,7 @@ def main():
         def reset_service_form():
             st.session_state["klient"] = "  "
             st.session_state["statusDE"] = ""
-            st.session_state["rok"] = "2023"
+            st.session_state["rok"] = "2024"
             st.session_state["opiekun"] = "Kamil"
             st.session_state["uwagi"] = ""
             st.session_state["poinformowany"] = "Nie"
