@@ -8,6 +8,7 @@ import bcrypt
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 import time
+import streamlit as st
 
 st.set_page_config(layout="wide")
 # Cache to store fetched clients
@@ -58,7 +59,6 @@ def fetch_clients():
         clients.append(f"{row[1]} {row[0]} {row[3]}")
     return clients
 
-# Function to check if the client already exists
 def client_exists(first_name, last_name, phone):
     rows = sheet1.get_all_values()[1:]  # Skip header row
     for row in rows:
@@ -66,7 +66,6 @@ def client_exists(first_name, last_name, phone):
             return True
     return False
 
-# Function to add a new client to the Google Sheet
 def add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office,steuernummer, tax_id, spouse_tax_id,Dataurodzenia,Religia,Ulica,Miejscowość,Dataslubu,DataUrŻony,imiezony,nazwisko_zony,UlicaMalzona,MiejscowoscMalzonka):
     if client_exists(first_name, last_name, phone):
         st.error("Taki klient już istnieje")
@@ -104,7 +103,6 @@ def service_exists(klient, rok):
         if row[0] == klient and row[2] == str(rok):
             return True
     return False
-# Function to add a new service to the Google Sheet
 def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne):
     if service_exists(klient, rok):
         st.markdown(f'<span style="border-radius:10px;padding:18px;background-color:rgba(255, 43, 43, 0.09);">Usługa dla klienta:<span style="font-size:18px; font-weight:bold;color:lightcoral"> {klient} </span>o statusie: <span style="font-size:18px; font-weight:bold;"> {statusDE}</span> za rok:<span style="font-size:18px; font-weight:bold;">  {rok}</span> już ISTNIEJE', unsafe_allow_html=True)
@@ -123,9 +121,7 @@ def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fa
     ]
     sheet2.append_row(new_row)
     st.success("Nowa usługa została dodana")
-import streamlit as st
 
-import streamlit as st
 
 def edytuj_klienta():
     st.subheader("Edytuj klienta")
@@ -187,157 +183,315 @@ def edytuj_klienta():
                 sheet1.update(cell_range, [updated_row])
 
                 st.success("Dane klienta zostały zaktualizowane")
-# Function to edit a service
 def edytuj_usluge():
     st.subheader("Edytuj usługę")
 
     all_clients = fetch_clients()
     all_services = fetch_services_data()
 
-    # Prepare options for select box
-    service_options = [f"{service_data[0]} - {service_data[2]}" for service_data in all_services]
+    # Dodajemy placeholder jako pierwszą opcję, aby domyślnie input był pusty
+    service_options = ["Wybierz usługę"] + [f"{service_data[0]} - {service_data[2]}" for service_data in all_services]
 
-    # Display services to edit
-    service_index = st.selectbox("Wybierz usługę do edycji", service_options)
-    
-    if service_index is not None:
-        service_index = service_options.index(service_index)
-        st.subheader(f"Edycja usługi: {service_options[service_index]}")
+    # Wyświetlamy selectbox; domyślnie pojawi się placeholder
+    selected_service = st.selectbox("Wybierz usługę do edycji", service_options)
+
+    # Jeżeli użytkownik wybierze usługę (inną niż placeholder), wyświetlamy resztę pól
+    if selected_service != "Wybierz usługę":
+        # Odejmujemy 1, bo pierwszy element to placeholder
+        service_index = service_options.index(selected_service) - 1
+        st.subheader(f"Edycja usługi: {selected_service}")
         service_data = all_services[service_index]
         
-        with st.form(key="status_form2"):
-            edytujPlatnosc = st.checkbox("Zaznacz, aby edytować platnosc (faktura itd.)", key="edytujPlatnosc")
-            dodatkowe2 = st.checkbox("Zaznacz, aby edytować koszty", key="dodatkowe2")
-            EdytujPit = st.checkbox("Zaznaczyć, jeżeli chcesz edytować PITY ", key="EdytujPit")
-            daneKontaktowe = st.checkbox("Zaznacz, jeżeli chcesz edytować dane kontaktowe", key="daneKontaktowe")
-            pola_ogr_ob_podat = st.checkbox("Zaznacz, jeżeli chcesz edytować pola związane z ogr. ob. podatkowym", key="pola_ogr_ob_podat")
-            CzyJestPitMałżonka = st.checkbox("Zaznacz, jeżeli chcesz edytować pit małżonka (kiedy rozliczają się razem)", key="CzyJestPitMałżonka")
-            Bezrobocie = st.checkbox("Zaznacz, jeżeli chcesz edytować BEZROBOCIE", key="Bezrobocie")
-            delegacje = st.checkbox("Edytuj delegacje zagraniczne", key="delegacje")
-            
-            st.form_submit_button(label='Załaduj')
-
         with st.form(key="status_form"):
-            klient = st.selectbox("Podatnik", all_clients, index=all_clients.index(service_data[0]) if service_data[0] in all_clients else 0)
+            poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"],
+                                          index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
+            wyslany = st.selectbox("Wysłane", ["Nie", "Tak"],
+                                   index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
+
+            klient = service_data[0]
             statusDE = st.selectbox(
                 "Status DE", 
                 ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
                 index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
             )
             
-            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else service_data[2]) if daneKontaktowe else service_data[2]
+            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
+                               index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0)
             zwrot = st.text_input("Zwrot", service_data[3])
-            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0) if daneKontaktowe else service_data[4]
+            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"],
+                                   index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
             uwagi = st.text_area("Uwagi", service_data[5])
-            poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else service_data[6])
-            wyslany = st.selectbox("Wysłane", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else service_data[7])
+           
+            fahrkosten = st.text_input("Fahrkosten", service_data[8]) 
+            ubernachtung = st.text_input("Übernachtung", service_data[9]) 
+            h24 = st.text_input("24h", service_data[10]) 
+            h8 = st.text_input("8h", service_data[11]) 
+            wKabinie = st.text_input("Kabine", service_data[12]) 
+            anUndAb = st.text_input("Ab und an", service_data[13]) 
+            dzieci = st.text_area("Dzieci", service_data[14])            
+                   
+            
+            zarobkiMezaEuro = service_data[21]
+            zarobZonyEuro = service_data[22]
+            cena = st.selectbox("Cena", ["", "250", "400", "300", "200"],
+                                  index=["", "250", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300", "200"] else 0) 
+            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
+                                            index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) 
+            zaplacono = st.text_input("Zapłacono", service_data[17])
+            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"],
+                                        index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]) if service_data[18] in ["", "Przelew", "Gotowka", "Faktura"] else 0) 
+            nrfaktury = st.text_input("Nr. Faktury", service_data[19])
+            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20])
+            
+            nr22 = service_data[23]
+            nr23 = service_data[24]
+            nr25 = service_data[25]
+            nr26 = service_data[26]
+            nr27 = service_data[27]
+            pracodawca = service_data[28]
+            chorobowe = service_data[29]
 
-            fahrkosten = st.text_input("Fahrkosten", service_data[8])if dodatkowe2 else service_data[8]
-            ubernachtung = st.text_input("Übernachtung", service_data[9])if dodatkowe2 else service_data[9]
-            h24 = st.text_input("24h", service_data[10])if dodatkowe2 else service_data[10]
-            h8 = st.text_input("8h", service_data[11])if dodatkowe2 else service_data[11]
-            wKabinie = st.text_input("Kabine", service_data[12])if dodatkowe2 else service_data[12]
-            anUndAb = st.text_input("Ab und an", service_data[13])if dodatkowe2 else service_data[13]
-            dzieci = st.text_area("Dzieci", service_data[14])if dodatkowe2 else service_data[14]           
+            klasaPIT1 = service_data[30]
+            brutto1 = service_data[31]
+            podatek1 = service_data[32]
+            dopłata1 = service_data[33]
+            kościelny1 = service_data[34]
+            kurzarbeitergeld1 = service_data[35]
             
-            zarobkiMezaEuro = st.text_input("Zarobki podatnika", service_data[21]) if dodatkowe2 else service_data[21]
-            zarobZonyEuro = st.text_input("Zarobi małżonka", service_data[22]) if dodatkowe2 else service_data[22]
-            cena = st.selectbox("Cena", ["", "250", "400", "300","200"], index=["", "250", "400", "300","200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300","200"] else service_data[15]) if edytujPlatnosc else service_data[15]
-            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else service_data[16])if edytujPlatnosc else service_data[16]
-            zaplacono = st.text_input("Zapłacono", service_data[17])if edytujPlatnosc else service_data[17]
-            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"], index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]))if edytujPlatnosc else service_data[18]
-            nrfaktury = st.text_input("Nr. Faktury", service_data[19])if edytujPlatnosc else service_data[19]
-            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20])if edytujPlatnosc else service_data[20]
-            
-            nr22 = st.text_input("nr22", service_data[23]) if EdytujPit else service_data[23]
-            nr23 = st.text_input("nr23", service_data[24])if EdytujPit else service_data[24]
-            nr25 = st.text_input("nr25", service_data[25])if EdytujPit else service_data[25]
-            nr26 = st.text_input("nr26", service_data[26])if EdytujPit else service_data[26]
-            nr27 = st.text_input("nr27", service_data[27])if EdytujPit else service_data[27]
-            pracodawca = st.text_input("pracodawca", service_data[28])if EdytujPit else service_data[28]
-            chorobowe = st.text_input("chorobowe", service_data[29])if EdytujPit else service_data[29]
+            klasaPIT2 = service_data[36]
+            brutto2 = service_data[37]
+            podatek2 = service_data[38]
+            dopłata2 = service_data[39]
+            kościelny2 = service_data[40]
+            kurzarbeitergeld2 = service_data[41]
 
-            klasaPIT1 = st.text_input("klasaPIT1", service_data[30])if EdytujPit else service_data[30]
-            brutto1 = st.text_input("brutto1", service_data[31])if EdytujPit else service_data[31]
-            podatek1 = st.text_input("podatek1", service_data[32])if EdytujPit else service_data[32]
-            dopłata1 = st.text_input("dopłata1", service_data[33])if EdytujPit else service_data[33]
-            kościelny1 = st.text_input("kościelny1", service_data[34])if EdytujPit else service_data[34]
-            kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[35])if EdytujPit else service_data[35]
+            klasaPIT3 = service_data[42]
+            brutto3 = service_data[43]
+            podatek3 = service_data[44]
+            dopłata3 = service_data[45]
+            kościelny3 = service_data[46]
+            kurzarbeitergeld3 = service_data[47]
             
-            klasaPIT2 = st.text_input("klasaPIT2", service_data[36])if EdytujPit else service_data[36]
-            brutto2 = st.text_input("brutto2", service_data[37])if EdytujPit else service_data[37]
-            podatek2 = st.text_input("podatek2", service_data[38])if EdytujPit else service_data[38]
-            dopłata2 = st.text_input("dopłata2", service_data[39])if EdytujPit else service_data[39]
-            kościelny2 = st.text_input("kościelny2", service_data[40])if EdytujPit else service_data[40]
-            kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[41])if EdytujPit else service_data[41]
+            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"],
+                                         index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) 
+            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"],
+                                          index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else 0)            
+            aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50])
+            miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) 
+            kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52])
+            narodowosc = st.text_input("Narodowość", service_data[53]) 
+            
+            KlasaPITmałżonka = service_data[54]
+            Bruttomałżonka = service_data[55]
+            Podatekmałżonka = service_data[56]
+            Dopłatamałżonka = service_data[57]
+            Kościelnymałżonka = service_data[58]
+            Kurzarbeitergeldmałżonka = service_data[59]
+            
+            Nr22malzonka = service_data[60]
+            Nr23malzonka = service_data[61]
+            Nr25malzonka = service_data[62]
+            Nr26malzonka = service_data[63]
+            Nr27malzonka = service_data[64]
+            Pracodawcamalzonka = service_data[65]
+            Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66])
+            Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[67]) 
+            Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[68])
+            
+            delegacje_zagraniczne = st.text_input("Delegacje zagraniczne", service_data[69]) 
+            aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
 
-            klasaPIT3 = st.text_input("klasaPIT3", service_data[42])if EdytujPit else service_data[42]
-            brutto3 = st.text_input("brutto3", service_data[43])if EdytujPit else service_data[43]
-            podatek3 = st.text_input("podatek3", service_data[44])if EdytujPit else service_data[44]
-            dopłata3 = st.text_input("dopłata3", service_data[45])if EdytujPit else service_data[45]
-            kościelny3 = st.text_input("kościelny3", service_data[46])if EdytujPit else service_data[46]
-            kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[47])if EdytujPit else service_data[47]
+        if aktualizuj_usluge:
+            updated_row = [
+                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany,
+                fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci,
+                cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury,
+                zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27,
+                pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1,
+                klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2,
+                klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3,
+                kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia,
+                kraj_urodzenia, narodowosc, KlasaPITmałżonka, Bruttomałżonka, Podatekmałżonka,
+                Dopłatamałżonka, Kościelnymałżonka, Kurzarbeitergeldmałżonka, Nr22malzonka,
+                Nr23malzonka, Nr25malzonka, Nr26malzonka, Nr27malzonka, Pracodawcamalzonka,
+                Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne
+            ]
+
+            # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
+            cell_range = f'A{service_index + 2}:BR{service_index + 2}'
+
+            # Aktualizujemy konkretny wiersz w Google Sheet
+            sheet2.update(cell_range, [updated_row])
+
+            st.success("Dane usługi zostały zaktualizowane")
+
+def fetch_services_data():
+    rows = sheet2.get_all_values()[1:]  # Skip header row
+    return rows
+def edytuj_usluge_skrocona():
+    st.subheader("Edytuj usługę - Kamil")
+
+    all_clients = fetch_clients()
+    all_services = fetch_services_data()
+
+    # Dodajemy placeholder jako pierwszą opcję, aby domyślnie input był pusty
+    service_options = ["Wybierz usługę"] + [f"{service_data[0]} - {service_data[2]}" for service_data in all_services]
+
+    # Wyświetlamy selectbox; domyślnie pojawi się placeholder
+    selected_service = st.selectbox("Wybierz usługę do edycji", service_options)
+
+    # Jeżeli użytkownik wybierze usługę (inną niż placeholder), wyświetlamy resztę pól
+    if selected_service != "Wybierz usługę":
+        # Odejmujemy 1, bo pierwszy element to placeholder
+        service_index = service_options.index(selected_service) - 1
+        st.subheader(f"Edycja usługi: {selected_service}")
+        service_data = all_services[service_index]
+        
+        with st.form(key="status_form2"):
+            CzyJestPitMałżonka = st.checkbox("Pit małżonka (kiedy rozliczają się razem)", key="CzyJestPitMałżonka")
+            pola_ogr_ob_podat = st.checkbox("Ograniczony obowiązek podatkowy", key="pola_ogr_ob_podat")
+            Bezrobocie = st.checkbox("BEZROBOCIE", key="Bezrobocie")
+            delegacje = st.checkbox("Delegacje zagraniczne", key="delegacje")
+            edytujPlatnosc = st.checkbox("Płatności (cena, status platnosci, faktura, zaplacono)", key="edytujPlatnosc")
+            # Wyświetlenie aktualnych wartości pól
+            st.markdown("**Aktualne wartości:**")
+            st.text(f"Konto ELSTER: {service_data[48]}")
+            st.text(f"Ograniczony obowiązek podatkowy: {service_data[49]}")
+            st.text(f"Rok: {service_data[2]}")
+            st.text(f"Opiekun: {service_data[4]}")
+            aktualneWartosci = st.checkbox("Edytuj Aktualne Wartości", key="akwart")
+
+            st.form_submit_button(label='Załaduj')
+
+        with st.form(key="status_form"):
+             
+            klient = service_data[0] 
+            statusDE = service_data[1]
             
-            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if dodatkowe2 else service_data[48]
-            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"], index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else service_data[49])if dodatkowe2 else service_data[49]            
+            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
+                               index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0) if aktualneWartosci else service_data[2]
+            zwrot = service_data[3]
+            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"],
+                                   index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0) if aktualneWartosci else service_data[4]
+            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"],
+                                         index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) if aktualneWartosci else service_data[48]
+            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"],
+                                          index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else 0) if aktualneWartosci else service_data[49]     
+            uwagi = st.text_area("Uwagi", service_data[5])
+            poinformowany = service_data[6]
+            wyslany = service_data[7]
+
+            fahrkosten = st.text_input("Fahrkosten", service_data[8]) 
+            ubernachtung = st.text_input("Übernachtung", service_data[9]) 
+            h24 = st.text_input("24h", service_data[10]) 
+            h8 = st.text_input("8h", service_data[11]) 
+            wKabinie = st.text_input("Kabine", service_data[12]) 
+            anUndAb = st.text_input("Ab und an", service_data[13]) 
+            dzieci = st.text_area("Dzieci", service_data[14])            
+            
+            zarobkiMezaEuro = st.text_input("Zarobki podatnika", service_data[21])
+            zarobZonyEuro = st.text_input("Zarobi małżonka", service_data[22])
+            cena = st.selectbox("Cena", ["", "250", "400", "300", "200"],
+                                  index=["", "250", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300", "200"] else 0) if edytujPlatnosc else service_data[15]
+            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
+                                            index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) if edytujPlatnosc else service_data[16]
+            zaplacono = st.text_input("Zapłacono", service_data[17]) if edytujPlatnosc else service_data[17]
+            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"],
+                                        index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]) if service_data[18] in ["", "Przelew", "Gotowka", "Faktura"] else 0) if edytujPlatnosc else service_data[18]
+            nrfaktury = st.text_input("Nr. Faktury", service_data[19]) if edytujPlatnosc else service_data[19]
+            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20]) if edytujPlatnosc else service_data[20]
+            
+            nr22 = st.text_input("nr22", service_data[23]) 
+            nr23 = st.text_input("nr23", service_data[24]) 
+            nr25 = st.text_input("nr25", service_data[25]) 
+            nr26 = st.text_input("nr26", service_data[26]) 
+            nr27 = st.text_input("nr27", service_data[27]) 
+            pracodawca = st.text_input("pracodawca", service_data[28]) 
+            chorobowe = st.text_input("chorobowe", service_data[29]) 
+
+            klasaPIT1 = st.text_input("klasaPIT1", service_data[30]) 
+            brutto1 = st.text_input("brutto1", service_data[31]) 
+            podatek1 = st.text_input("podatek1", service_data[32]) 
+            dopłata1 = st.text_input("dopłata1", service_data[33]) 
+            kościelny1 = st.text_input("kościelny1", service_data[34]) 
+            kurzarbeitergeld1 = st.text_input("kurzarbeitergeld1", service_data[35]) 
+            
+            klasaPIT2 = st.text_input("klasaPIT2", service_data[36]) 
+            brutto2 = st.text_input("brutto2", service_data[37]) 
+            podatek2 = st.text_input("podatek2", service_data[38]) 
+            dopłata2 = st.text_input("dopłata2", service_data[39]) 
+            kościelny2 = st.text_input("kościelny2", service_data[40]) 
+            kurzarbeitergeld2 = st.text_input("kurzarbeitergeld2", service_data[41]) 
+
+            klasaPIT3 = st.text_input("klasaPIT3", service_data[42]) 
+            brutto3 = st.text_input("brutto3", service_data[43]) 
+            podatek3 = st.text_input("podatek3", service_data[44]) 
+            dopłata3 = st.text_input("dopłata3", service_data[45]) 
+            kościelny3 = st.text_input("kościelny3", service_data[46]) 
+            kurzarbeitergeld3 = st.text_input("kurzarbeitergeld3", service_data[47]) 
+            
+    
             aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50]) if pola_ogr_ob_podat else service_data[50]
             miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) if pola_ogr_ob_podat else service_data[51]
             kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52]) if pola_ogr_ob_podat else service_data[52]
             narodowosc = st.text_input("Narodowość", service_data[53]) if pola_ogr_ob_podat else service_data[53]
             
-            KlasaPITmałżonka = st.text_input("KlasaPITmałżonka", service_data[54])if CzyJestPitMałżonka else service_data[54]
-            Bruttomałżonka = st.text_input("Bruttomałżonka", service_data[55])if CzyJestPitMałżonka else service_data[55]
-            Podatekmałżonka = st.text_input("Podatekmałżonka", service_data[56])if CzyJestPitMałżonka else service_data[56]
-            Dopłatamałżonka = st.text_input("Dopłatamałżonka", service_data[57])if CzyJestPitMałżonka else service_data[57]
-            Kościelnymałżonka = st.text_input("Kościelnymałżonka", service_data[58])if CzyJestPitMałżonka else service_data[58]
-            Kurzarbeitergeldmałżonka = st.text_input("Kurzarbeitergeldmałżonka", service_data[59])if CzyJestPitMałżonka else service_data[59]
+            KlasaPITmałżonka = st.text_input("KlasaPITmałżonka", service_data[54]) if CzyJestPitMałżonka else service_data[54]
+            Bruttomałżonka = st.text_input("Bruttomałżonka", service_data[55]) if CzyJestPitMałżonka else service_data[55]
+            Podatekmałżonka = st.text_input("Podatekmałżonka", service_data[56]) if CzyJestPitMałżonka else service_data[56]
+            Dopłatamałżonka = st.text_input("Dopłatamałżonka", service_data[57]) if CzyJestPitMałżonka else service_data[57]
+            Kościelnymałżonka = st.text_input("Kościelnymałżonka", service_data[58]) if CzyJestPitMałżonka else service_data[58]
+            Kurzarbeitergeldmałżonka = st.text_input("Kurzarbeitergeldmałżonka", service_data[59]) if CzyJestPitMałżonka else service_data[59]
             
-            Nr22malzonka = st.text_input("Nr22malzonka", service_data[60])if CzyJestPitMałżonka else service_data[60]
-            Nr23malzonka = st.text_input("Nr23malzonka", service_data[61])if CzyJestPitMałżonka else service_data[61]
-            Nr25malzonka = st.text_input("Nr25malzonka", service_data[62])if CzyJestPitMałżonka else service_data[62]
-            Nr26malzonka = st.text_input("Nr26malzonka", service_data[63])if CzyJestPitMałżonka else service_data[63]
-            Nr27malzonka = st.text_input("Nr27malzonka", service_data[64])if CzyJestPitMałżonka else service_data[64]
-            Pracodawcamalzonka = st.text_input("Pracodawcamalzonka", service_data[65])if CzyJestPitMałżonka else service_data[65]
-            Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66])if CzyJestPitMałżonka else service_data[66]
-            Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[66])if Bezrobocie else service_data[66]
-            Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[67])if Bezrobocie else service_data[67]
+            Nr22malzonka = st.text_input("Nr22malzonka", service_data[60]) if CzyJestPitMałżonka else service_data[60]
+            Nr23malzonka = st.text_input("Nr23malzonka", service_data[61]) if CzyJestPitMałżonka else service_data[61]
+            Nr25malzonka = st.text_input("Nr25malzonka", service_data[62]) if CzyJestPitMałżonka else service_data[62]
+            Nr26malzonka = st.text_input("Nr26malzonka", service_data[63]) if CzyJestPitMałżonka else service_data[63]
+            Nr27malzonka = st.text_input("Nr27malzonka", service_data[64]) if CzyJestPitMałżonka else service_data[64]
+            Pracodawcamalzonka = st.text_input("Pracodawcamalzonka", service_data[65]) if CzyJestPitMałżonka else service_data[65]
+            Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66]) if CzyJestPitMałżonka else service_data[66]
+            Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[67]) if Bezrobocie else service_data[67]
+            Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[68]) if Bezrobocie else service_data[68]
             
-            delegacje_zagraniczne = st.text_input("Delegacje zagraniczne", service_data[68])if delegacje else service_data[68]
+            delegacje_zagraniczne = st.text_input("Delegacje zagraniczne", service_data[69]) if delegacje else service_data[69]
+
+            
             aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
 
         if aktualizuj_usluge:
             updated_row = [
-                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany, fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci, cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury, zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27, pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1, klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2, klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3, kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia, kraj_urodzenia, narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka,delegacje_zagraniczne
+                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany,
+                fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci,
+                cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury,
+                zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27,
+                pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1,
+                klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2,
+                klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3,
+                kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia,
+                kraj_urodzenia, narodowosc, KlasaPITmałżonka, Bruttomałżonka, Podatekmałżonka,
+                Dopłatamałżonka, Kościelnymałżonka, Kurzarbeitergeldmałżonka, Nr22malzonka,
+                Nr23malzonka, Nr25malzonka, Nr26malzonka, Nr27malzonka, Pracodawcamalzonka,
+                Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne
             ]
 
-            # Define the range to cover all columns of the updated_row
+            # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
             cell_range = f'A{service_index + 2}:BR{service_index + 2}'
 
-            # Update the specific row in the Google Sheet
+            # Aktualizujemy konkretny wiersz w Google Sheet
             sheet2.update(cell_range, [updated_row])
 
             st.success("Dane usługi zostały zaktualizowane")
-
-# Function to fetch and filter services data
-
-def fetch_services_data():
-    rows = sheet2.get_all_values()[1:]  # Skip header row
-    return rows
-
-# Function to fetch the entire ZP status sheet data
 
 def fetch_full_status_data():
     rows = sheet2.get_all_values()  # Include header row
     return pd.DataFrame(rows[1:], columns=rows[0])
 
-# Function to update the ZP status sheet data
 def update_status_data(df):
     sheet2.clear()
     sheet2.append_row(df.columns.tolist())
     for row in df.values.tolist():
         sheet2.append_row(row)
 
-# Make column names unique
 def make_unique_columns(df):
     columns = pd.Series(df.columns)
     for dup in columns[columns.duplicated()].unique():
@@ -403,7 +557,7 @@ def main():
             st.sidebar.error("Błędna nazwa użytkownika")
 
     if cookies.get("logged_in") == "True":
-        menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta","Edytuj usługę"]
+        menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta", "Edytuj usługę", "Edytuj usługę - skrócona"]
         choice = st.sidebar.selectbox("Menu", menu)
 
 
@@ -496,8 +650,6 @@ def main():
 
             if submit_info:
                 add_client(first_name, last_name, office, phone, email, marital_status, bank_account, swift, tax_office, steuernummer, tax_id, spouse_tax_id, Dataurodzenia, Religia, Ulica, Miejscowość, Dataslubu, DataUrŻony, imiezony,nazwisko_zony,UlicaMalzona,MiejscowoscMalzonka)
-                
-
 
         # Funkcja do resetowania formularza dodawania usługi
         def reset_service_form():
@@ -569,7 +721,6 @@ def main():
             st.session_state["Chorobowemalzonka"] = ""
             st.session_state["Bezrobociepodatnika"] = ""
             st.session_state["Bezrobociemałżonka"] = ""
-        # Sekcja dodawania usługi
         if choice == "Dodaj usługę":
             st.subheader("Dodaj nową usługę")
 
@@ -775,8 +926,7 @@ def main():
                     st.error("Podanie danych klienta, Statusu DE oraz roku rozliczenia jest wymagane")
                 else:
                     delegacje_str = ";".join([f"{kraj} {dni}" for kraj, dni in delegacje_zagraniczne])
-                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka,delegacje_str)
-                
+                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka,delegacje_str)       
         elif choice == "Podsumowanie":
             st.subheader("Podsumowanie")
 
@@ -872,7 +1022,6 @@ def main():
             else:
                 ilosc_klienci_z_zaliczka = 0
                 st.subheader(f"Klienci z zaliczką lub z statusem nieopłacono ({ilosc_klienci_z_zaliczka})")         
-
         elif choice == "Cały excel":
             st.subheader("Cały arkusz ZP status") 
             df = fetch_full_status_data()
@@ -886,6 +1035,8 @@ def main():
             edytuj_klienta()
         elif choice == "Edytuj usługę":
             edytuj_usluge()
+        elif choice == "Edytuj usługę - skrócona":
+            edytuj_usluge_skrocona()
     else:
         st.info("Proszę się zalogować")
 
