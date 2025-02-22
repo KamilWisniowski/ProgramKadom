@@ -532,34 +532,35 @@ def highlight_row_if_status(row):
     return styles
 # Main application
 def main():
-    st.title("System Zarządzania Klientami")
-
-    # Opcja logowania
     hashed_passwords = load_hashed_passwords()
     usernames = ["kkamil", "bbeata", "kkasia"]  # Lista nazw użytkowników
-    username = st.sidebar.text_input("Nazwa użytkownika")
-    password = st.sidebar.text_input("Hasło", type="password")
 
     if "logged_in" not in cookies:
         cookies["logged_in"] = "False"
 
-    if st.sidebar.button("Zaloguj się"):
-        if username in usernames:
-            user_index = usernames.index(username)
-            if verify_password(hashed_passwords[user_index], password):
-                st.sidebar.success("Zalogowano pomyślnie")
-                cookies["logged_in"] = "True"
-                cookies["username"] = username
-                cookies.save()
-            else:
-                st.sidebar.error("Błędne hasło")
-        else:
-            st.sidebar.error("Błędna nazwa użytkownika")
+    # Logowanie
+    if cookies.get("logged_in") != "True":
+        st.sidebar.title("Logowanie")
+        username = st.sidebar.text_input("Nazwa użytkownika")
+        password = st.sidebar.text_input("Hasło", type="password")
 
-    if cookies.get("logged_in") == "True":
+        if st.sidebar.button("Zaloguj się"):
+            if username in usernames:
+                user_index = usernames.index(username)
+                if verify_password(hashed_passwords[user_index], password):
+                    st.sidebar.success("Zalogowano pomyślnie")
+                    cookies["logged_in"] = "True"
+                    cookies["username"] = username
+                    cookies.save()
+                    st.experimental_rerun()  # Przeładuj stronę po zalogowaniu
+                else:
+                    st.sidebar.error("Błędne hasło")
+            else:
+                st.sidebar.error("Błędna nazwa użytkownika")
+    else:
+        # Menu na górze strony po zalogowaniu
         menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta", "Edytuj usługę", "Edytuj usługę - skrócona"]
         choice = st.sidebar.selectbox("Menu", menu)
-
 
         # Funkcja do resetowania formularza dodawania klienta
         def reset_client_form():
@@ -1037,8 +1038,6 @@ def main():
             edytuj_usluge()
         elif choice == "Edytuj usługę - skrócona":
             edytuj_usluge_skrocona()
-    else:
-        st.info("Proszę się zalogować")
-
+    
 if __name__ == "__main__":
     main()
