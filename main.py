@@ -9,7 +9,7 @@ import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 import time
 import streamlit as st
-
+import re
 st.set_page_config(layout="wide")
 # Cache to store fetched clients
 clients_cache = None
@@ -58,7 +58,22 @@ def fetch_clients():
     for row in rows:
         clients.append(f"{row[1]} {row[0]} {row[3]}")
     return clients
+def fetch_clients_biuro():
+    """
+    Pobiera dane klientów i zwraca słownik {pełne imię i nazwisko: biuro}.
+    """
+    clients_dict = {}  # Słownik do przechowywania klientów
+    rows = sheet1.get_all_values()[1:]  # Pomijamy nagłówek
 
+    for row in rows:
+        if len(row) < 4:
+            continue  # Pomijamy wiersze, które nie mają wystarczającej liczby kolumn
+        
+        full_name = f"{row[1]} {row[0]}" 
+        biuro = row[2]  # Biuro klienta
+        clients_dict[full_name] = biuro  # Dodajemy do słownika
+
+    return clients_dict  # Zwracamy słownik
 def client_exists(first_name, last_name, phone):
     rows = sheet1.get_all_values()[1:]  # Skip header row
     for row in rows:
@@ -328,6 +343,15 @@ def edytuj_usluge():
 def fetch_services_data():
     rows = sheet2.get_all_values()[1:]  # Skip header row
     return rows
+def extract_name(full_string):
+    """
+    Funkcja wyodrębnia tylko nazwisko i imię z ciągu tekstowego.
+    Pomija numer telefonu i ewentualne dane w nawiasach.
+    """
+    match = re.match(r"([A-ZŻŹĆĄŚĘŁÓŃ]+) ([A-ZŻŹĆĄŚĘŁÓŃ]+)", full_string)
+    if match:
+        return f"{match.group(1)} {match.group(2)}"  # Nazwisko + Imię
+    return full_string  # Jeśli nie pasuje, zwróć oryginał
 def edytuj_usluge_skrocona():
     st.subheader("Edytuj usługę - Kamil")
 
@@ -932,7 +956,8 @@ def main():
             st.subheader("Podsumowanie")
 
             # Pobieranie danych
-            total_clients = len(sheet1.get_all_values()) - 1  # Excluding header row
+            total_clients = len(sheet1.get_all_values()) - 1  # Pomijamy nagłówek
+            clients_dict = fetch_clients_biuro()  # Słownik { "Imię Nazwisko": "Biuro" }
             services_data = fetch_services_data()
             total_services = len(services_data)
 
@@ -940,10 +965,8 @@ def main():
             incomplete_services = [s for s in services_data if s[1] == "DE - Niekompletny zestaw"]
             processed_services = [s for s in services_data if s[1] == "DE - Rozliczono"]
             received_docs_services = [s for s in services_data if s[1] == "DE - Otrzymano dokumenty"]
-
-
             uninformed_or_unsent = [s for s in services_data if (s[6] == "Nie" or s[7] == "Nie") and s[1] == "DE - Rozliczono"]
-            downpayment_services = [s for s in services_data if s[16] != "Opłacony"]
+            downpayment_services = [s for s in services_data if len(s) > 16 and s[16] != "Opłacony"]
 
             # Wyświetlanie podsumowania w kafelkach
             col1, col2, col3 = st.columns(3)
@@ -961,17 +984,40 @@ def main():
                 st.metric(label="Usługi 'DE - Otrzymano dokumenty'", value=len(received_docs_services))
             with col6:
                 st.metric(label="Do wysłania", value=len(uninformed_or_unsent))
-
-            #Klienci z usługami 'DE - Otrzymano dokumenty'
+            
+            # Klienci z usługami 'DE - Otrzymano dokumenty'
             if received_docs_services:
-                selected_columns = [0, 1, 2, 4, 5, 48,49]  # Indeksy kolumn 1, 2, 3, 5, 7
-                received_docs_services_filtered = [[row[i] for i in selected_columns] for row in received_docs_services]
-                received_docs_df = pd.DataFrame(received_docs_services_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Opiekun", "UWAGI", "Konto Elster", "Ogr. ob. podatkowy"])
-                # Numerowanie wierszy od 1
+                rows_for_df = []
+                for s in received_docs_services:
+                    full_name_raw = s[0]
+                    full_name = extract_name(full_name_raw)  # Oczyszczone imię i nazwisko
+                    biuro = clients_dict.get(full_name)
+
+                    # Pobieranie wartości z zabezpieczeniem przed IndexError
+                    rok = s[2] if len(s) > 3 else ""
+                    opiekun = s[4] if len(s) > 4 else ""
+                    uwagi = s[5] if len(s) > 5 else ""
+                    konto_elster = s[6] if len(s) > 6 else ""
+                    ogr_ob_podatkowy = s[7] if len(s) > 7 else ""
+
+                    row_data = [full_name, s[1], biuro, rok, opiekun, uwagi, konto_elster, ogr_ob_podatkowy]
+                    rows_for_df.append(row_data)
+
+                received_docs_df = pd.DataFrame(
+                    rows_for_df,
+                    columns=["Imię i Nazwisko", "Status", "Biuro", "Rok", "Opiekun", "UWAGI", "Konto Elster", "Ogr. ob. podatkowy"]
+                )
                 received_docs_df.index = received_docs_df.index + 1
-                
+
                 ilosc_otrzymano_dokumenty = len(received_docs_df)
-                st.markdown(f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami <span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> (ilość: {ilosc_otrzymano_dokumenty})</h3>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<h3 style='color: #545454; font-weight:600;font-size:20px'>Klienci z usługami "
+                    f"<span style='color: #03ab0f; font-weight:700;font-size:30px'>DE - Otrzymano dokumenty</span> "
+                    f"(ilość: {ilosc_otrzymano_dokumenty})</h3>",
+                    unsafe_allow_html=True
+                )
+
+                # Stylizacja tabeli (jeśli funkcja highlight_row_if_status jest zaimplementowana)
                 received_docs_services_styled = received_docs_df.style.apply(highlight_row_if_status, axis=1)
                 st.dataframe(received_docs_services_styled)
             else:
