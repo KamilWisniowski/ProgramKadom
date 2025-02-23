@@ -353,6 +353,11 @@ def extract_name(full_string):
         return f"{match.group(1)} {match.group(2)}"  # Nazwisko + Imię
     return full_string  # Jeśli nie pasuje, zwróć oryginał
 def edytuj_usluge_skrocona():
+    # Jeśli poprzednia aktualizacja zakończyła się powodzeniem, wyświetl komunikat
+    if st.session_state.get("update_success", False):
+        st.success("Dane usługi zostały zaktualizowane")
+        del st.session_state["update_success"]
+
     st.subheader("Edytuj usługę - Kamil")
 
     all_clients = fetch_clients()
@@ -388,10 +393,8 @@ def edytuj_usluge_skrocona():
             st.form_submit_button(label='Załaduj')
 
         with st.form(key="status_form"):
-             
             klient = service_data[0] 
             statusDE = service_data[1]
-            
             rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
                                index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0) if aktualneWartosci else service_data[2]
             zwrot = service_data[3]
@@ -498,13 +501,10 @@ def edytuj_usluge_skrocona():
                 Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne
             ]
 
-            # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
             cell_range = f'A{service_index + 2}:BR{service_index + 2}'
-
-            # Aktualizujemy konkretny wiersz w Google Sheet
             sheet2.update(cell_range, [updated_row])
-
-            st.success("Dane usługi zostały zaktualizowane")
+            st.session_state["update_success"] = True
+            st.experimental_rerun()
 
 def fetch_full_status_data():
     rows = sheet2.get_all_values()  # Include header row
@@ -583,7 +583,7 @@ def main():
                 st.sidebar.error("Błędna nazwa użytkownika")
     else:
         # Menu na górze strony po zalogowaniu
-        menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta", "Edytuj usługę", "Edytuj usługę - skrócona"]
+        menu = ["Podsumowanie", "Dodaj klienta", "Dodaj usługę", "Cały excel", "Edytuj klienta", "Edytuj usługę", "Edytuj usługę - Kamil"]
         choice = st.sidebar.selectbox("Menu", menu)
 
         # Funkcja do resetowania formularza dodawania klienta
@@ -1082,7 +1082,7 @@ def main():
             edytuj_klienta()
         elif choice == "Edytuj usługę":
             edytuj_usluge()
-        elif choice == "Edytuj usługę - skrócona":
+        elif choice == "Edytuj usługę - Kamil":
             edytuj_usluge_skrocona()
     
 if __name__ == "__main__":
