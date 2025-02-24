@@ -535,13 +535,13 @@ def highlight_status(row):
     
     # Highlight specific cells in "Poinformowany" and "Wysłany" columns
     if row['Poinformowany'] == "Nie":
-        styles[3] = 'background-color: red; color: white;'
-    if row['Wysłany'] == "Nie":
         styles[4] = 'background-color: red; color: white;'
+    if row['Wysłany'] == "Nie":
+        styles[5] = 'background-color: red; color: white;'
     if row['Poinformowany'] == "Tak":
-        styles[3] = 'background-color: green; color: white;'
-    if row['Wysłany'] == "Tak":
         styles[4] = 'background-color: green; color: white;'
+    if row['Wysłany'] == "Tak":
+        styles[5] = 'background-color: green; color: white;'
     return styles
 def highlight_row_if_status(row):
     styles = ['' for _ in row]
@@ -997,8 +997,8 @@ def main():
                     rok = s[2] if len(s) > 3 else ""
                     opiekun = s[4] if len(s) > 4 else ""
                     uwagi = s[5] if len(s) > 5 else ""
-                    konto_elster = s[6] if len(s) > 6 else ""
-                    ogr_ob_podatkowy = s[7] if len(s) > 7 else ""
+                    konto_elster = s[48] if len(s) > 6 else ""
+                    ogr_ob_podatkowy = s[49] if len(s) > 7 else ""
 
                     row_data = [full_name, s[1], biuro, rok, opiekun, uwagi, konto_elster, ogr_ob_podatkowy]
                     rows_for_df.append(row_data)
@@ -1043,11 +1043,26 @@ def main():
   
             #Klienci do wysłania
             if uninformed_or_unsent:
+                rows_for_df = []
+                for s in uninformed_or_unsent:
+                    full_name_raw = s[0]
+                    full_name = extract_name(full_name_raw)  # Oczyszczone imię i nazwisko
+                    biuro = clients_dict.get(full_name)
+
+                    # Pobieranie wartości z zabezpieczeniem przed IndexError
+                    rok = s[2] if len(s) > 3 else ""
+                    opiekun = s[4] if len(s) > 4 else ""
+                    uwagi = s[5] if len(s) > 5 else ""
+                    poinformowany = s[6] if len(s) > 6 else ""
+                    wyslany = s[7] if len(s) > 6 else ""
+
+                    row_data = [full_name, s[1], biuro, rok, poinformowany, wyslany, uwagi]
+                    rows_for_df.append(row_data)
                 # Upewnij się, że liczba kolumn pasuje do danych
-                selected_columns = [0, 1, 2, 6, 7, 5]  # Indeksy kolumn 1, 2, 3, 5, 7
-                uninformed_or_unsent_filtered = [[row[i] for i in selected_columns] for row in uninformed_or_unsent]
-                uninformed_or_unsent_df = pd.DataFrame(uninformed_or_unsent_filtered, columns=["Imię i Nazwisko", "Status", "Rok", "Poinformowany", "Wysłany", "UWAGI"])
-            
+                uninformed_or_unsent_df = pd.DataFrame(
+                        rows_for_df,
+                        columns=["Imię i Nazwisko", "Status", "Biuro", "Rok", "Poinformowany", "Wysłany", "UWAGI"]
+                    )
                 ilosc_niepoinformowany = len(uninformed_or_unsent_df)
                 st.subheader(f"Klienci do wysłania (ilość: {ilosc_niepoinformowany})")    
                 uninformed_or_unsent_styled = uninformed_or_unsent_df.style.apply(highlight_status, axis=1)
