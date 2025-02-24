@@ -168,7 +168,7 @@ def edytuj_klienta():
                 office = st.selectbox("Biuro", ["Przeworsk", "Jarosław"], index=["Przeworsk", "Jarosław"].index(client_data[2]))
                 phone = st.text_input("Nr telefonu", client_data[3])
                 email = st.text_input("Email", client_data[4])
-                marital_status = st.selectbox('Stan cywilny', ['kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'], index=['kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'].index(client_data[5]))
+                marital_status = st.selectbox('Stan cywilny', ['Kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'], index=['Kawaler', 'żonaty', 'rozwiedziony', 'panienka', 'mężatka'].index(client_data[5]))
                 bank_account = st.text_input("Nr konta bankowego", client_data[6])
                 swift = st.text_input("SWIFT", client_data[7])
                 tax_office = st.text_input("Finanzamt", client_data[8])
