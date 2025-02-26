@@ -642,10 +642,10 @@ def main():
                 tax_office = tax_office.upper() if tax_office else None
                 steuernummer = st.text_input("Steuernummer", key="steuernummer")
                 tax_id = st.text_input("Nr ID", key="tax_id")
-                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
+                if marital_status2 == "Żonaty" or marital_status2 == "Mężatka":
                     spouse_tax_id = st.text_input("Nr ID małżonka", key="spouse_tax_id")
                 Dataurodzenia = st.text_input("Data urodzenia podatnika", key="Dataurodzenia")
-                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
+                if marital_status2 == "Żonaty" or marital_status2 == "Mężatka":
                     DataUrŻony = st.text_input("Data urodzenia małżonka", key="DataUrŻony")
                 Religia = st.selectbox("Religia", ["", "VD", "RK", "EV"], key="Religia")
                 Ulica = st.text_input("Ulica zamieszkania podatnika", key="Ulica")
@@ -654,8 +654,8 @@ def main():
                 Miejscowość = Miejscowość.upper() if Miejscowość else None
 
                 marital_status = st.text_input("Stan cywilny", key="marital_status",disabled=True)
-                if marital_status2 == "żonaty" or marital_status2 == "mężatka":
-                    st.session_state["marital_status2"] = "żonaty"
+                if marital_status2 == "Żonaty" or marital_status2 == "Mężatka":
+                    st.session_state["marital_status2"] = "Żonaty"
                     Dataslubu = st.text_input("Data ślubu", key="Dataslubu")
                     imiezony = st.text_input("Imię małżonka", key="imiezony")
                     imiezony = imiezony.upper() if imiezony else None
