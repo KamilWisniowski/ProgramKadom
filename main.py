@@ -504,7 +504,8 @@ def edytuj_usluge_skrocona():
             cell_range = f'A{service_index + 2}:BR{service_index + 2}'
             sheet2.update(cell_range, [updated_row])
             st.session_state["update_success"] = True
-            st.experimental_rerun()
+            st.rerun()
+
 
 def fetch_full_status_data():
     rows = sheet2.get_all_values()  # Include header row
