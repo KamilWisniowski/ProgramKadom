@@ -248,8 +248,8 @@ def edytuj_usluge():
             
             zarobkiMezaEuro = service_data[21]
             zarobZonyEuro = service_data[22]
-            cena = st.selectbox("Cena", ["", "250", "400", "300", "200"],
-                                  index=["", "250", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300", "200"] else 0) 
+            cena = st.selectbox("Cena", ["", "250", "450", "400", "300", "200"],
+                                  index=["", "250", "450", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "450", "400", "300", "200"] else 0) 
             statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
                                             index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) 
             zaplacono = st.text_input("Zapłacono", service_data[17])
@@ -418,8 +418,8 @@ def edytuj_usluge_skrocona():
             
             zarobkiMezaEuro = st.text_input("Zarobki podatnika", service_data[21])
             zarobZonyEuro = st.text_input("Zarobi małżonka", service_data[22])
-            cena = st.selectbox("Cena", ["", "250", "400", "300", "200"],
-                                  index=["", "250", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "400", "300", "200"] else 0) if edytujPlatnosc else service_data[15]
+            cena = st.selectbox("Cena", ["", "250", "450", "400", "300", "200"],
+                                  index=["", "250", "450", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "450", "400", "300", "200"] else 0) if edytujPlatnosc else service_data[15]
             statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
                                             index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) if edytujPlatnosc else service_data[16]
             zaplacono = st.text_input("Zapłacono", service_data[17]) if edytujPlatnosc else service_data[17]
@@ -801,7 +801,7 @@ def main():
                 wKabinie = st.text_input("Kabine", key="wKabinie")
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
-                cena = st.selectbox("Cena", ["", "250", "400", "300","200"], key="cena")
+                cena = st.selectbox("Cena", ["", "250", "450", "400", "300","200"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
                 zwrot = ""
