@@ -118,7 +118,7 @@ def service_exists(klient, rok):
         if row[0] == klient and row[2] == str(rok):
             return True
     return False
-def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne):
+def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne,rozliczycSamCzyRazem):
     if service_exists(klient, rok):
         st.markdown(f'<span style="border-radius:10px;padding:18px;background-color:rgba(255, 43, 43, 0.09);">Usługa dla klienta:<span style="font-size:18px; font-weight:bold;color:lightcoral"> {klient} </span>o statusie: <span style="font-size:18px; font-weight:bold;"> {statusDE}</span> za rok:<span style="font-size:18px; font-weight:bold;">  {rok}</span> już ISTNIEJE', unsafe_allow_html=True)
         return
@@ -132,7 +132,7 @@ def add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fa
         wyslany,
         fahrkosten,
         ubernachtung,
-        h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne
+        h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka, delegacje_zagraniczne, rozliczycSamCzyRazem
     ]
     sheet2.append_row(new_row)
     st.success("Nowa usługa została dodana")
@@ -229,7 +229,8 @@ def edytuj_usluge():
                 ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
                 index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
             )
-            
+            rozliczycSamCzyRazem = st.selectbox("Rozliczyć samego czy razem", ['Razem', 'Sam'],
+                               index=['Razem', 'Sam'].index(service_data[70]) if service_data[70] in ['Razem', 'Sam'] else 'Razem') 
             rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
                                index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0)
             zwrot = st.text_input("Zwrot", service_data[3])
@@ -329,11 +330,11 @@ def edytuj_usluge():
                 kraj_urodzenia, narodowosc, KlasaPITmałżonka, Bruttomałżonka, Podatekmałżonka,
                 Dopłatamałżonka, Kościelnymałżonka, Kurzarbeitergeldmałżonka, Nr22malzonka,
                 Nr23malzonka, Nr25malzonka, Nr26malzonka, Nr27malzonka, Pracodawcamalzonka,
-                Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne
+                Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne,rozliczycSamCzyRazem
             ]
 
             # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
-            cell_range = f'A{service_index + 2}:BR{service_index + 2}'
+            cell_range = f'A{service_index + 2}:BS{service_index + 2}'
 
             # Aktualizujemy konkretny wiersz w Google Sheet
             sheet2.update(cell_range, [updated_row])
@@ -501,7 +502,7 @@ def edytuj_usluge_skrocona():
                 Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne
             ]
 
-            cell_range = f'A{service_index + 2}:BR{service_index + 2}'
+            cell_range = f'A{service_index + 2}:BS{service_index + 2}'
             sheet2.update(cell_range, [updated_row])
             st.session_state["update_success"] = True
             st.rerun()
@@ -789,6 +790,7 @@ def main():
             st.subheader("Wypełnij dane usługi")
             with st.form(key="status_form", border=False):
                 klient = st.selectbox("Podatnik", all_clients, key="klient2")
+                rozliczycSamCzyRazem = st.selectbox("Rozliczyć samego czy razem?", ['Razem','Sam'], key="rozliczycSamCzyRazem")
                 statusDE = st.selectbox("Status DE", ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], key="statusDE")
                 rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'], key="rok")
                 opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"], key="opiekun")
@@ -802,6 +804,7 @@ def main():
                 wKabinie = st.text_input("Kabine", key="wKabinie")
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
+                chorobowe = st.text_area("Chorobowe", key="chorobowe")
                 cena = st.selectbox("Cena", ["", "250", "450", "400", "300","200"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
@@ -841,7 +844,6 @@ def main():
                     nr26 = st.text_input("nr26", key="nr26")
                     nr27 = st.text_input("nr27", key="nr27")
                     pracodawca = st.text_input("pracodawca", key="pracodawca")
-                    chorobowe = st.text_input("chorobowe", key="chorobowe")
                 else:
                     nr22 = ""
                     nr23 = ""
@@ -849,7 +851,6 @@ def main():
                     nr26 = ""
                     nr27 = ""
                     pracodawca = ""
-                    chorobowe = ""
 
                 if CzyJestPit1:
                     klasaPIT1 = st.text_input("klasaPIT1", key="klasaPIT1")
@@ -952,7 +953,7 @@ def main():
                     st.error("Podanie danych klienta, Statusu DE oraz roku rozliczenia jest wymagane")
                 else:
                     delegacje_str = ";".join([f"{kraj} {dni}" for kraj, dni in delegacje_zagraniczne])
-                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka,delegacje_str)       
+                    add_service(klient,statusDE,rok,zwrot,opiekun,uwagi,poinformowany,wyslany,fahrkosten,ubernachtung,h24,h8,wKabinie,anUndAb,dzieci,cena,statusPlatnosciu,zaplacono,formaZaplaty,nrfaktury,dataWystawieniaFaktury,zarobkiMezaEuro,zarobZonyEuro,nr22,nr23,nr25,nr26,nr27,pracodawca,chorobowe,klasaPIT1,brutto1,podatek1,dopłata1,kościelny1,kurzarbeitergeld1,klasaPIT2,brutto2,podatek2,dopłata2,kościelny2,kurzarbeitergeld2,klasaPIT3,brutto3,podatek3,dopłata3,kościelny3,kurzarbeitergeld3,kontoElster,ogrObPodatkowy,aktualny_stan_zamieszkania,miejsce_urodzenia,kraj_urodzenia,narodowosc,KlasaPITmałżonka,Bruttomałżonka,Podatekmałżonka,Dopłatamałżonka,Kościelnymałżonka,Kurzarbeitergeldmałżonka,Nr22malzonka,Nr23malzonka,Nr25malzonka,Nr26malzonka,Nr27malzonka,Pracodawcamalzonka,Chorobowemalzonka,Bezrobociepodatnika,Bezrobociemałżonka,delegacje_str,rozliczycSamCzyRazem)       
         elif choice == "Podsumowanie":
             st.subheader("Podsumowanie")
 
