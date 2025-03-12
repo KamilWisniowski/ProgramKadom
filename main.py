@@ -804,7 +804,7 @@ def main():
                 wKabinie = st.text_input("Kabine", key="wKabinie")
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
-                chorobowe = st.text_area("Chorobowe", key="chorobowe")
+                chorobowe = st.text_input("Chorobowe", key="chorobowe")
                 cena = st.selectbox("Cena", ["", "250", "450", "400", "300","200"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
