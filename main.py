@@ -805,6 +805,7 @@ def main():
                 anUndAb = st.text_input("Ab und an", key="anUndAb")
                 dzieci = st.text_area("Dzieci", key="dzieci")
                 chorobowe = st.text_input("Chorobowe", key="chorobowe")
+                pracodawca = st.text_input("pracodawca", key="pracodawca")
                 cena = st.selectbox("Cena", ["", "250", "450", "400", "300","200"], key="cena")
                 statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"], key="statusPlatnosciu")
                 zaplacono = st.text_input("Zapłacono", key="zaplacono")
@@ -843,14 +844,12 @@ def main():
                     nr25 = st.text_input("nr25", key="nr25")
                     nr26 = st.text_input("nr26", key="nr26")
                     nr27 = st.text_input("nr27", key="nr27")
-                    pracodawca = st.text_input("pracodawca", key="pracodawca")
                 else:
                     nr22 = ""
                     nr23 = ""
                     nr25 = ""
                     nr26 = ""
                     nr27 = ""
-                    pracodawca = ""
 
                 if CzyJestPit1:
                     klasaPIT1 = st.text_input("klasaPIT1", key="klasaPIT1")
