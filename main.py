@@ -8,13 +8,165 @@ import bcrypt
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 import time
-import streamlit as st
 import re
-st.set_page_config(layout="wide")
-# Cache to store fetched clients
-clients_cache = None
-last_fetch_time = 0
+import platform
+import io
+import base64
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+import google.generativeai as genai
+from PIL import Image
+import json
+from pdf2image import convert_from_bytes
+# --- KONFIGURACJA DANYCH (DEFINICJE) ---
+SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
+SHEET_NAME_1 = 'ZP dane kont'
+SHEET_NAME_2 = 'ZP status'
+SERVICE_ACCOUNT_INFO = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
 
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
+
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_INFO, SCOPES)
+
+drive_service = build('drive', 'v3', credentials=credentials)
+
+client = gspread.authorize(credentials)
+sheet1 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_1)
+sheet2 = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME_2)
+
+
+
+    # --- GOOGLE DRIVE HELPERS ---
+def get_or_create_folder(folder_name, parent_id=None):
+    """Znajduje folder lub tworzy nowy, jeśli nie istnieje."""
+    query = f"mimeType='application/vnd.google-apps.folder' and name='{folder_name}' and trashed=false"
+    if parent_id:
+        query += f" and '{parent_id}' in parents"
+    
+    results = drive_service.files().list(q=query, fields="files(id, name)").execute()
+    files = results.get('files', [])
+    
+    if files:
+        return files[0]['id']
+    else:
+        file_metadata = {
+            'name': folder_name,
+            'mimeType': 'application/vnd.google-apps.folder'
+        }
+        if parent_id:
+            file_metadata['parents'] = [parent_id]
+        folder = drive_service.files().create(body=file_metadata, fields='id').execute()
+        return folder['id']
+
+def upload_file_to_drive(file_obj, filename, folder_id, mime_type):
+    """Wgrywa plik na Dysk Google."""
+    file_metadata = {'name': filename, 'parents': [folder_id]}
+    media = MediaIoBaseUpload(file_obj, mimetype=mime_type, resumable=True)
+    file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    return file.get('id')
+
+def list_files_in_folder(folder_id):
+    """Pobiera listę plików w folderze."""
+    query = f"'{folder_id}' in parents and trashed=false"
+    results = drive_service.files().list(q=query, fields="files(id, name, webViewLink, mimeType)").execute()
+    return results.get('files', [])
+
+def delete_file_from_drive(file_id):
+    """Usuwa plik."""
+    drive_service.files().delete(fileId=file_id).execute()
+
+# --- AI HELPERS ---
+def convert_image_to_pdf_bytes(image_file):
+    """Konwertuje przesłany obraz na bytes PDF."""
+    image = Image.open(image_file)
+    
+    # Konwersja na RGB jest konieczna, jeśli obraz to PNG z przezroczystością (RGBA),
+    # inaczej zapis do PDF wyrzuci błąd.
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
+        
+    pdf_bytes = io.BytesIO()
+    image.save(pdf_bytes, format='PDF')
+    pdf_bytes.seek(0)
+    return pdf_bytes
+
+def analyze_document_with_ai(file_bytes, mime_type):
+    """
+    Wysyła plik do Gemini AI w celu klasyfikacji i ekstrakcji danych.
+    Obsługuje automatycznie ścieżki Popplera na Windows i Linux.
+    """
+    # Używamy modelu Flash (szybki i tani)
+    model = genai.GenerativeModel('gemini-2.0-flash')
+    
+    prompt = """
+    Jesteś asystentem księgowym. Przeanalizuj ten dokument podatkowy.
+    
+    1. KLASYFIKACJA: Określ typ dokumentu: 'LSTB' (Lohnsteuerbescheinigung), 'EUEWR' (Zaświadczenie UE/EWR), lub 'RESZTA' (Inne).
+    2. DANE: Wyciągnij kluczowe dane w zależności od typu.
+       - Jeśli LSTB: Klasa podatkowa (klasaPIT), Brutto (brutto), Podatek (podatek), Solidaritätszuschlag (doplata), Kirchensteuer (koscielny).
+       - Jeśli EUEWR: Dochód brutto (brutto), Podatek (podatek).
+       - Jeśli Inne: Krótki opis co to jest.
+    
+    Zwróć TYLKO czysty JSON w formacie:
+    {
+        "typ": "LSTB" | "EUEWR" | "RESZTA",
+        "dane": {
+            "klasaPIT": "wartość lub puste",
+            "brutto": "wartość lub puste",
+            "podatek": "wartość lub puste",
+            "doplata": "wartość lub puste",
+            "koscielny": "wartość lub puste",
+            "opis": "opis jeśli reszta"
+        }
+    }
+    """
+    
+    try:
+        # Gemini obsługuje obrazy natywnie, ale PDFy wymagają konwersji na obraz
+        # w tym konkretnym przepływie (Streamlit in-memory).
+        
+        if mime_type == 'application/pdf':
+            # --- FIX DLA POPPLERA (Windows vs Linux) ---
+            if platform.system() == "Windows":
+                # Tu wpisz ścieżkę do folderu BIN w Twoim pobranym popplerze
+                poppler_path = r"C:\poppler-24.08.0\Library\bin"
+            else:
+                # Na serwerze (Linux) poppler jest w systemie (dzięki packages.txt)
+                poppler_path = None
+
+            # Konwersja PDF na obraz (pierwsza strona)
+            # file_bytes.read() czyta plik, więc potem trzeba zrobić seek(0) jeśli chcemy go użyć ponownie
+            pdf_content = file_bytes.read()
+            file_bytes.seek(0) # Reset pointera dla reszty programu
+            
+            images = convert_from_bytes(pdf_content, poppler_path=poppler_path)
+            
+            if images:
+                image_part = images[0] # Bierzemy 1. stronę do analizy
+                response = model.generate_content([prompt, image_part])
+            else:
+                return None
+        else:
+            # Obraz (JPG/PNG) - wysyłamy bezpośrednio
+            image_part = Image.open(file_bytes)
+            response = model.generate_content([prompt, image_part])
+            
+        # Parsowanie JSONa z odpowiedzi (usuwanie ewentualnych znaczników Markdown)
+        text = response.text.strip()
+        # Czasami AI zwraca ```json { ... } ```, musimy to wyczyścić
+        if text.startswith("```json"):
+            text = text.replace("```json", "").replace("```", "")
+        elif text.startswith("```"):
+             text = text.replace("```", "")
+             
+        return json.loads(text.strip())
+        
+    except Exception as e:
+        st.error(f"Błąd AI: {e}")
+        return None
 # Inicjalizacja managera ciasteczek
 cookies = EncryptedCookieManager(
     prefix="my_prefix",  # Zmień prefix na unikalny dla swojej aplikacji
@@ -204,143 +356,284 @@ def edytuj_usluge():
     all_clients = fetch_clients()
     all_services = fetch_services_data()
 
-    # Dodajemy placeholder jako pierwszą opcję, aby domyślnie input był pusty
     service_options = ["Wybierz usługę"] + [f"{service_data[0]} - {service_data[2]}" for service_data in all_services]
-
-    # Wyświetlamy selectbox; domyślnie pojawi się placeholder
     selected_service = st.selectbox("Wybierz usługę do edycji", service_options)
 
-    # Jeżeli użytkownik wybierze usługę (inną niż placeholder), wyświetlamy resztę pól
     if selected_service != "Wybierz usługę":
-        # Odejmujemy 1, bo pierwszy element to placeholder
         service_index = service_options.index(selected_service) - 1
-        st.subheader(f"Edycja usługi: {selected_service}")
         service_data = all_services[service_index]
         
-        with st.form(key="status_form"):
-            poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"],
-                                          index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
-            wyslany = st.selectbox("Wysłane", ["Nie", "Tak"],
-                                   index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
+        # Dane podstawowe do struktury folderów
+        klient_full_name = service_data[0] # Np. "KOWALSKI JAN 123456789"
+        # Wyciągamy samo Nazwisko Imie do nazwy folderu (bez telefonu)
+        folder_name_base = " ".join(klient_full_name.split()[:2]) 
+        rok_uslugi = service_data[2]
 
-            klient = service_data[0]
-            statusDE = st.selectbox(
-                "Status DE", 
-                ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
-                index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
-            )
-            rozliczycSamCzyRazem = st.selectbox("Rozliczyć samego czy razem", ['Razem', 'Sam'],
-                               index=['Razem', 'Sam'].index(service_data[70]) if service_data[70] in ['Razem', 'Sam'] else 'Razem') 
-            rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
-                               index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0)
-            zwrot = st.text_input("Zwrot", service_data[3])
-            opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"],
-                                   index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
-            uwagi = st.text_area("Uwagi", service_data[5])
-           
-            fahrkosten = st.text_input("Fahrkosten", service_data[8]) 
-            ubernachtung = st.text_input("Übernachtung", service_data[9]) 
-            h24 = st.text_input("24h", service_data[10]) 
-            h8 = st.text_input("8h", service_data[11]) 
-            wKabinie = st.text_input("Kabine", service_data[12]) 
-            anUndAb = st.text_input("Ab und an", service_data[13]) 
-            dzieci = st.text_area("Dzieci", service_data[14])            
-                   
+        # TABS
+        tab1, tab2 = st.tabs(["📝 Dane Excel", "📂 Dokumenty (Google Drive & AI)"])
+
+
+        # --- TAB 1: EXCEL (To co było wcześniej) ---
+        with tab1:
+            st.subheader(f"Edycja danych: {selected_service}")
+            with st.form(key="status_form"):
+                poinformowany = st.selectbox("Poinformowany", ["Nie", "Tak"],
+                                            index=["Nie", "Tak"].index(service_data[6]) if service_data[6] in ["Nie", "Tak"] else 0)
+                wyslany = st.selectbox("Wysłane", ["Nie", "Tak"],
+                                    index=["Nie", "Tak"].index(service_data[7]) if service_data[7] in ["Nie", "Tak"] else 0)
+
+                klient = service_data[0]
+                statusDE = st.selectbox(
+                    "Status DE", 
+                    ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"], 
+                    index=["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"].index(service_data[1]) if service_data[1] in ["", "DE - Niekompletny zestaw", "DE - Otrzymano dokumenty", "DE - Rozliczono"] else 0
+                )
+                rozliczycSamCzyRazem = st.selectbox("Rozliczyć samego czy razem", ['Razem', 'Sam'],
+                                index=['Razem', 'Sam'].index(service_data[70]) if service_data[70] in ['Razem', 'Sam'] else 'Razem') 
+                rok = st.selectbox("Rok", ['2024','2023', '2022', '2021', '2020', '2019', '2018'],
+                                index=['2024','2023', '2022', '2021', '2020', '2019', '2018'].index(service_data[2]) if service_data[2] in ['2024','2023', '2022', '2021', '2020', '2019', '2018'] else 0)
+                zwrot = st.text_input("Zwrot", service_data[3])
+                opiekun = st.selectbox("Opiekun", ["Kamil", "Beata", "Kasia"],
+                                    index=["Kamil", "Beata", "Kasia"].index(service_data[4]) if service_data[4] in ["Kamil", "Beata", "Kasia"] else 0)
+                uwagi = st.text_area("Uwagi", service_data[5])
             
-            zarobkiMezaEuro = service_data[21]
-            zarobZonyEuro = service_data[22]
-            cena = st.selectbox("Cena", ["", "250", "450", "400", "300", "200"],
-                                  index=["", "250", "450", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "450", "400", "300", "200"] else 0) 
-            statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
-                                            index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) 
-            zaplacono = st.text_input("Zapłacono", service_data[17])
-            formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"],
-                                        index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]) if service_data[18] in ["", "Przelew", "Gotowka", "Faktura"] else 0) 
-            nrfaktury = st.text_input("Nr. Faktury", service_data[19])
-            dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20])
+                fahrkosten = st.text_input("Fahrkosten", service_data[8]) 
+                ubernachtung = st.text_input("Übernachtung", service_data[9]) 
+                h24 = st.text_input("24h", service_data[10]) 
+                h8 = st.text_input("8h", service_data[11]) 
+                wKabinie = st.text_input("Kabine", service_data[12]) 
+                anUndAb = st.text_input("Ab und an", service_data[13]) 
+                dzieci = st.text_area("Dzieci", service_data[14])            
+                    
+                
+                zarobkiMezaEuro = service_data[21]
+                zarobZonyEuro = service_data[22]
+                cena = st.selectbox("Cena", ["", "250", "450", "400", "300", "200"],
+                                    index=["", "250", "450", "400", "300", "200"].index(service_data[15]) if service_data[15] in ["", "250", "450", "400", "300", "200"] else 0) 
+                statusPlatnosciu = st.selectbox("Status", ["Nieopłacony", "Zaliczka", "Opłacony"],
+                                                index=["Nieopłacony", "Zaliczka", "Opłacony"].index(service_data[16]) if service_data[16] in ["Nieopłacony", "Zaliczka", "Opłacony"] else 0) 
+                zaplacono = st.text_input("Zapłacono", service_data[17])
+                formaZaplaty = st.selectbox("Metoda płatności", ["", "Przelew", "Gotowka", "Faktura"],
+                                            index=["", "Przelew", "Gotowka", "Faktura"].index(service_data[18]) if service_data[18] in ["", "Przelew", "Gotowka", "Faktura"] else 0) 
+                nrfaktury = st.text_input("Nr. Faktury", service_data[19])
+                dataWystawieniaFaktury = st.text_input("Data wystawienia faktury", service_data[20])
+                
+                nr22 = service_data[23]
+                nr23 = service_data[24]
+                nr25 = service_data[25]
+                nr26 = service_data[26]
+                nr27 = service_data[27]
+                pracodawca = service_data[28]
+                chorobowe = service_data[29]
+
+                klasaPIT1 = service_data[30]
+                brutto1 = service_data[31]
+                podatek1 = service_data[32]
+                dopłata1 = service_data[33]
+                kościelny1 = service_data[34]
+                kurzarbeitergeld1 = service_data[35]
+                
+                klasaPIT2 = service_data[36]
+                brutto2 = service_data[37]
+                podatek2 = service_data[38]
+                dopłata2 = service_data[39]
+                kościelny2 = service_data[40]
+                kurzarbeitergeld2 = service_data[41]
+
+                klasaPIT3 = service_data[42]
+                brutto3 = service_data[43]
+                podatek3 = service_data[44]
+                dopłata3 = service_data[45]
+                kościelny3 = service_data[46]
+                kurzarbeitergeld3 = service_data[47]
+                
+                kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"],
+                                            index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) 
+                ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"],
+                                            index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else 0)            
+                aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50])
+                miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) 
+                kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52])
+                narodowosc = st.text_input("Narodowość", service_data[53]) 
+                
+                KlasaPITmałżonka = service_data[54]
+                Bruttomałżonka = service_data[55]
+                Podatekmałżonka = service_data[56]
+                Dopłatamałżonka = service_data[57]
+                Kościelnymałżonka = service_data[58]
+                Kurzarbeitergeldmałżonka = service_data[59]
+                
+                Nr22malzonka = service_data[60]
+                Nr23malzonka = service_data[61]
+                Nr25malzonka = service_data[62]
+                Nr26malzonka = service_data[63]
+                Nr27malzonka = service_data[64]
+                Pracodawcamalzonka = service_data[65]
+                Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66])
+                Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[67]) 
+                Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[68])
+                
+                delegacje_zagraniczne = st.text_input("Delegacje zagraniczne", service_data[69]) 
+                aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
+
+            if aktualizuj_usluge:
+                updated_row = [
+                    klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany,
+                    fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci,
+                    cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury,
+                    zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27,
+                    pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1,
+                    klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2,
+                    klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3,
+                    kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia,
+                    kraj_urodzenia, narodowosc, KlasaPITmałżonka, Bruttomałżonka, Podatekmałżonka,
+                    Dopłatamałżonka, Kościelnymałżonka, Kurzarbeitergeldmałżonka, Nr22malzonka,
+                    Nr23malzonka, Nr25malzonka, Nr26malzonka, Nr27malzonka, Pracodawcamalzonka,
+                    Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne,rozliczycSamCzyRazem
+                ]
+
+                # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
+                cell_range = f'A{service_index + 2}:BS{service_index + 2}'
+
+                # Aktualizujemy konkretny wiersz w Google Sheet
+                sheet2.update(cell_range, [updated_row])
+
+                st.success("Dane usługi zostały zaktualizowane")
+
+     
+
+        # --- TAB 2: GOOGLE DRIVE & AI ---
+        with tab2:
+            st.subheader(f"Dokumenty: {folder_name_base} / {rok_uslugi}")
             
-            nr22 = service_data[23]
-            nr23 = service_data[24]
-            nr25 = service_data[25]
-            nr26 = service_data[26]
-            nr27 = service_data[27]
-            pracodawca = service_data[28]
-            chorobowe = service_data[29]
+            # 1. Zarządzanie strukturą folderów
+            with st.spinner("Łączenie z Google Drive..."):
+                # Znajdź/Stwórz folder Klienta
+                client_folder_id = get_or_create_folder(folder_name_base)
+                # Znajdź/Stwórz folder Roku wewnątrz folderu Klienta
+                year_folder_id = get_or_create_folder(rok_uslugi, parent_id=client_folder_id)
+                
+                # Subfoldery typów dokumentów
+                subfolders = {
+                    "LSTB": get_or_create_folder("LSTB", parent_id=year_folder_id),
+                    "EUEWR": get_or_create_folder("EUEWR", parent_id=year_folder_id),
+                    "RESZTA": get_or_create_folder("RESZTA", parent_id=year_folder_id)
+                }
 
-            klasaPIT1 = service_data[30]
-            brutto1 = service_data[31]
-            podatek1 = service_data[32]
-            dopłata1 = service_data[33]
-            kościelny1 = service_data[34]
-            kurzarbeitergeld1 = service_data[35]
+            # 2. Wyświetlanie plików
+            st.markdown("---")
+            cols = st.columns(3)
+            for idx, (cat_name, cat_id) in enumerate(subfolders.items()):
+                with cols[idx]:
+                    st.markdown(f"### 📁 {cat_name}")
+                    files = list_files_in_folder(cat_id)
+                    if files:
+                        for f in files:
+                            st.write(f"📄 [{f['name']}]({f['webViewLink']})")
+                            if st.button(f"Usuń {f['name']}", key=f"del_{f['id']}"):
+                                delete_file_from_drive(f['id'])
+                                st.rerun()
+                    else:
+                        st.info("Brak plików")
+
+            # 3. Inteligentne Wgrywanie (AI)
+            st.markdown("---")
+            st.header("🤖 Inteligentne Wgrywanie Dokumentów")
             
-            klasaPIT2 = service_data[36]
-            brutto2 = service_data[37]
-            podatek2 = service_data[38]
-            dopłata2 = service_data[39]
-            kościelny2 = service_data[40]
-            kurzarbeitergeld2 = service_data[41]
-
-            klasaPIT3 = service_data[42]
-            brutto3 = service_data[43]
-            podatek3 = service_data[44]
-            dopłata3 = service_data[45]
-            kościelny3 = service_data[46]
-            kurzarbeitergeld3 = service_data[47]
+            uploaded_files = st.file_uploader("Wgraj dokumenty (PDF lub Zdjęcia)", accept_multiple_files=True, type=['pdf', 'png', 'jpg', 'jpeg'])
             
-            kontoElster = st.selectbox("Czy podatnik ma konto ELSTER", ["Nie", "Tak"],
-                                         index=["Nie", "Tak"].index(service_data[48]) if service_data[48] in ["Nie", "Tak"] else 0) 
-            ogrObPodatkowy = st.selectbox("Ograniczony obowiązek podatkowy", ["Nie", "Tak"],
-                                          index=["Nie", "Tak"].index(service_data[49]) if service_data[49] in ["Nie", "Tak"] else 0)            
-            aktualny_stan_zamieszkania = st.text_input("Aktualny kraj zamieszkania", service_data[50])
-            miejsce_urodzenia = st.text_input("Miejscowość urodzenia", service_data[51]) 
-            kraj_urodzenia = st.text_input("Kraj urodzenia", service_data[52])
-            narodowosc = st.text_input("Narodowość", service_data[53]) 
-            
-            KlasaPITmałżonka = service_data[54]
-            Bruttomałżonka = service_data[55]
-            Podatekmałżonka = service_data[56]
-            Dopłatamałżonka = service_data[57]
-            Kościelnymałżonka = service_data[58]
-            Kurzarbeitergeldmałżonka = service_data[59]
-            
-            Nr22malzonka = service_data[60]
-            Nr23malzonka = service_data[61]
-            Nr25malzonka = service_data[62]
-            Nr26malzonka = service_data[63]
-            Nr27malzonka = service_data[64]
-            Pracodawcamalzonka = service_data[65]
-            Chorobowemalzonka = st.text_input("Chorobowemalzonka", service_data[66])
-            Bezrobociepodatnika = st.text_input("Bezrobocie podatnika", service_data[67]) 
-            Bezrobociemałżonka = st.text_input("Bezrobocie małżonka", service_data[68])
-            
-            delegacje_zagraniczne = st.text_input("Delegacje zagraniczne", service_data[69]) 
-            aktualizuj_usluge = st.form_submit_button(label='Aktualizuj usługę')
+            if uploaded_files:
+                # Kontener na stan analizy
+                if "ai_results" not in st.session_state:
+                    st.session_state.ai_results = {}
 
-        if aktualizuj_usluge:
-            updated_row = [
-                klient, statusDE, rok, zwrot, opiekun, uwagi, poinformowany, wyslany,
-                fahrkosten, ubernachtung, h24, h8, wKabinie, anUndAb, dzieci,
-                cena, statusPlatnosciu, zaplacono, formaZaplaty, nrfaktury, dataWystawieniaFaktury,
-                zarobkiMezaEuro, zarobZonyEuro, nr22, nr23, nr25, nr26, nr27,
-                pracodawca, chorobowe, klasaPIT1, brutto1, podatek1, dopłata1, kościelny1, kurzarbeitergeld1,
-                klasaPIT2, brutto2, podatek2, dopłata2, kościelny2, kurzarbeitergeld2,
-                klasaPIT3, brutto3, podatek3, dopłata3, kościelny3, kurzarbeitergeld3,
-                kontoElster, ogrObPodatkowy, aktualny_stan_zamieszkania, miejsce_urodzenia,
-                kraj_urodzenia, narodowosc, KlasaPITmałżonka, Bruttomałżonka, Podatekmałżonka,
-                Dopłatamałżonka, Kościelnymałżonka, Kurzarbeitergeldmałżonka, Nr22malzonka,
-                Nr23malzonka, Nr25malzonka, Nr26malzonka, Nr27malzonka, Pracodawcamalzonka,
-                Chorobowemalzonka, Bezrobociepodatnika, Bezrobociemałżonka, delegacje_zagraniczne,rozliczycSamCzyRazem
-            ]
+                if st.button("🚀 Analizuj Dokumenty"):
+                    st.session_state.ai_results = {} # Reset
+                    progress_bar = st.progress(0)
+                    
+                    for i, uploaded_file in enumerate(uploaded_files):
+                        # Przygotowanie pliku
+                        file_bytes = io.BytesIO(uploaded_file.getvalue())
+                        mime_type = uploaded_file.type
+                        
+                        # Konwersja zdjęcia na PDF jeśli trzeba (dla ujednolicenia zapisu)
+                        final_pdf_bytes = file_bytes
+                        final_mime = mime_type
+                        if mime_type.startswith('image'):
+                            final_pdf_bytes = convert_image_to_pdf_bytes(file_bytes)
+                            final_mime = 'application/pdf'
+                            file_bytes.seek(0) # Reset pointer for AI analysis
 
-            # Definiujemy zakres, aby pokryć wszystkie kolumny z updated_row
-            cell_range = f'A{service_index + 2}:BS{service_index + 2}'
+                        # Analiza AI
+                        ai_data = analyze_document_with_ai(file_bytes, mime_type)
+                        
+                        st.session_state.ai_results[uploaded_file.name] = {
+                            "original_file": uploaded_file,
+                            "final_bytes": final_pdf_bytes,
+                            "final_mime": final_mime,
+                            "ai_data": ai_data
+                        }
+                        progress_bar.progress((i + 1) / len(uploaded_files))
+                
+                # 4. Wyświetlenie wyników i Potwierdzenie
+                if st.session_state.get("ai_results"):
+                    st.write("### Weryfikacja Danych")
+                    
+                    for fname, res in st.session_state.ai_results.items():
+                        ai_data = res['ai_data']
+                        col_doc, col_form = st.columns([1, 1])
+                        
+                        with col_doc:
+                            st.info(f"Plik: {fname}")
+                            # Podgląd (jeśli obraz to obraz, jak PDF to info)
+                            if res['original_file'].type.startswith('image'):
+                                st.image(res['original_file'], caption="Podgląd", use_column_width=True)
+                            else:
+                                base64_pdf = base64.b64encode(res['original_file'].getvalue()).decode('utf-8')
+                                pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="500" type="application/pdf"></iframe>'
+                                st.markdown(pdf_display, unsafe_allow_html=True)
 
-            # Aktualizujemy konkretny wiersz w Google Sheet
-            sheet2.update(cell_range, [updated_row])
-
-            st.success("Dane usługi zostały zaktualizowane")
-
+                        with col_form:
+                            st.write("📊 **Dane wyciągnięte przez AI**")
+                            
+                            # Edytowalne pola z danymi AI
+                            suggested_type = ai_data.get('typ', 'RESZTA') if ai_data else 'RESZTA'
+                            doc_type = st.selectbox(f"Typ dokumentu ({fname})", ["LSTB", "EUEWR", "RESZTA"], index=["LSTB", "EUEWR", "RESZTA"].index(suggested_type), key=f"type_{fname}")
+                            
+                            dane = ai_data.get('dane', {}) if ai_data else {}
+                            
+                            # Pola do zapisu w Excelu
+                            val_brutto = st.text_input(f"Brutto ({fname})", value=dane.get('brutto', ''), key=f"brutto_{fname}")
+                            val_tax = st.text_input(f"Podatek ({fname})", value=dane.get('podatek', ''), key=f"tax_{fname}")
+                            
+                            if doc_type == "LSTB":
+                                val_class = st.text_input(f"Klasa PIT ({fname})", value=dane.get('klasaPIT', ''), key=f"cls_{fname}")
+                                val_soli = st.text_input(f"Solidaritätszuschlag ({fname})", value=dane.get('doplata', ''), key=f"soli_{fname}")
+                                val_church = st.text_input(f"Kościelny ({fname})", value=dane.get('koscielny', ''), key=f"church_{fname}")
+                            
+                            save_col, skip_col = st.columns(2)
+                            if save_col.button(f"✅ Zatwierdź i Zapisz {fname}", key=f"save_{fname}"):
+                                # 1. Zapisz plik na Drive
+                                target_folder_id = subfolders[doc_type]
+                                # Nowa nazwa pliku: TYP_Nazwisko_Imie.pdf
+                                new_filename = f"{doc_type}_{folder_name_base.replace(' ', '_')}.pdf"
+                                # Jeśli plik o takiej nazwie istnieje, dodaj timestamp (uproszczenie)
+                                upload_file_to_drive(res['final_bytes'], new_filename, target_folder_id, res['final_mime'])
+                                
+                                # 2. Aktualizacja Excela (Tutaj musisz zmapować pola do swoich kolumn w sheet2)
+                                # Przykład dla LSTB (zakładam, że to PIT1 w excelu)
+                                if doc_type == "LSTB":
+                                    # Musisz znaleźć indeksy kolumn dla PIT1 w swoim arkuszu
+                                    # Przykład (do dopasowania do Twojej funkcji add_service/update):
+                                    # sheet2.update_cell(service_index + 2, KOLUMNA_BRUTTO_1, val_brutto)
+                                    st.info("Tutaj nastąpi aktualizacja Excela (kod trzeba dopasować do indeksów kolumn).")
+                                    
+                                    # UWAGA: Aby to zadziałało, musisz tu wywołać logicznie sheet2.update() 
+                                    # używając service_index (który mamy z góry funkcji)
+                                    # Np:
+                                    # sheet2.update_cell(service_index + 2, 31, val_brutto) # 31 to przykładowy index brutto1
+                                    
+                                st.success(f"Plik {new_filename} zapisany na Drive!")
 def fetch_services_data():
     rows = sheet2.get_all_values()[1:]  # Skip header row
     return rows
