@@ -18,11 +18,27 @@ import google.generativeai as genai
 from PIL import Image
 import json
 from pdf2image import convert_from_bytes
+# --- KONFIGURACJA AI (WKLEJ TO ZARAZ POD IMPORTAMI) ---
+try:
+    if "GEMINI_API_KEY" in st.secrets:
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    else:
+        st.error("⚠️ Błąd konfiguracji: Brak klucza 'GEMINI_API_KEY' w pliku secrets.toml")
+except Exception as e:
+    st.warning(f"Nie udało się skonfigurować AI: {e}")
 # --- KONFIGURACJA DANYCH (DEFINICJE) ---
 SPREADSHEET_ID = '1k4UVgLa00Hqa7le3QPbwQMSXwpnYPlvcEQTxXqTEY4U'
 SHEET_NAME_1 = 'ZP dane kont'
 SHEET_NAME_2 = 'ZP status'
 SERVICE_ACCOUNT_INFO = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
+if platform.system() == "Windows":
+    # Twoja lokalna ścieżka na Windowsie
+    POPPLER_PATH = r"C:\poppler\Library\bin" 
+else:
+    # Na Linuxie (Streamlit Cloud) zostawiamy None - system sam znajdzie zainstalowany pakiet
+    POPPLER_PATH = None 
+
+# 2. Używamy tej ścieżki
 
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
@@ -79,15 +95,44 @@ def delete_file_from_drive(file_id):
     drive_service.files().delete(fileId=file_id).execute()
 
 # --- AI HELPERS ---
+# --- AI HELPERS (POPRAWIONE I ROZBUDOWANE) ---
+def parse_german_money(s):
+    """Inteligentny parser niemieckich kwot (np. 1.500,00 -> 1500.0)."""
+    if not s: return 0.0
+    s = str(s).strip()
+    # Usuń znaki walut i spacje
+    s = re.sub(r'[^\d,\.-]', '', s)
+    if not s: return 0.0
+
+    # Scenariusz: Jest przecinek (standard niemiecki) -> "1.505,04"
+    if ',' in s:
+        s = s.replace('.', '') # Usuń kropki tysięcy
+        s = s.replace(',', '.') # Zamień przecinek na kropkę
+    # Scenariusz: Tylko kropki (np. "1.505")
+    elif '.' in s:
+        parts = s.split('.')
+        if len(parts) > 1: # Zakładamy, że kropka to separator tysięcy
+            s = s.replace('.', '')
+    
+    try:
+        return float(s)
+    except:
+        return 0.0
+
+# --- AI HELPERS ---
+import io
+import json
+import re
+import platform
+from PIL import Image
+import google.generativeai as genai
+from pdf2image import convert_from_bytes
+
 def convert_image_to_pdf_bytes(image_file):
     """Konwertuje przesłany obraz na bytes PDF."""
     image = Image.open(image_file)
-    
-    # Konwersja na RGB jest konieczna, jeśli obraz to PNG z przezroczystością (RGBA),
-    # inaczej zapis do PDF wyrzuci błąd.
     if image.mode == 'RGBA':
         image = image.convert('RGB')
-        
     pdf_bytes = io.BytesIO()
     image.save(pdf_bytes, format='PDF')
     pdf_bytes.seek(0)
@@ -95,78 +140,96 @@ def convert_image_to_pdf_bytes(image_file):
 
 def analyze_document_with_ai(file_bytes, mime_type):
     """
-    Wysyła plik do Gemini AI w celu klasyfikacji i ekstrakcji danych.
-    Obsługuje automatycznie ścieżki Popplera na Windows i Linux.
+    Główna funkcja AI: Obsługuje Popplera (Win/Linux) i logikę LStB.
     """
-    # Używamy modelu Flash (szybki i tani)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    # Wybór modelu
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     prompt = """
-    Jesteś asystentem księgowym. Przeanalizuj ten dokument podatkowy.
+    Jesteś księgowym. Przeanalizuj dokument podatkowy (zazwyczaj niemiecki Lohnsteuerbescheinigung).
     
-    1. KLASYFIKACJA: Określ typ dokumentu: 'LSTB' (Lohnsteuerbescheinigung), 'EUEWR' (Zaświadczenie UE/EWR), lub 'RESZTA' (Inne).
-    2. DANE: Wyciągnij kluczowe dane w zależności od typu.
-       - Jeśli LSTB: Klasa podatkowa (klasaPIT), Brutto (brutto), Podatek (podatek), Solidaritätszuschlag (doplata), Kirchensteuer (koscielny).
-       - Jeśli EUEWR: Dochód brutto (brutto), Podatek (podatek).
-       - Jeśli Inne: Krótki opis co to jest.
+    1. KLASYFIKACJA: Typ dokumentu: 'LSTB', 'EUEWR', lub 'RESZTA'.
+    2. DANE: Wyciągnij dane (kwoty w formacie oryginalnym np. 1.200,50).
+       - LSTB: klasaPIT (Steuerklasse), brutto (3.), podatek (4. Lohnsteuer), doplata (5. Soli), koscielny (6. Kirche).
+       - EUEWR: brutto, podatek.
     
-    Zwróć TYLKO czysty JSON w formacie:
+    Zwróć JSON:
     {
         "typ": "LSTB" | "EUEWR" | "RESZTA",
         "dane": {
-            "klasaPIT": "wartość lub puste",
-            "brutto": "wartość lub puste",
-            "podatek": "wartość lub puste",
-            "doplata": "wartość lub puste",
-            "koscielny": "wartość lub puste",
-            "opis": "opis jeśli reszta"
+            "klasaPIT": "wartość", "brutto": "wartość", "podatek": "wartość",
+            "doplata": "wartość", "koscielny": "wartość", "opis": "krótki opis"
         }
     }
     """
     
     try:
-        # Gemini obsługuje obrazy natywnie, ale PDFy wymagają konwersji na obraz
-        # w tym konkretnym przepływie (Streamlit in-memory).
-        
-        if mime_type == 'application/pdf':
-            # --- FIX DLA POPPLERA (Windows vs Linux) ---
-            if platform.system() == "Windows":
-                # Tu wpisz ścieżkę do folderu BIN w Twoim pobranym popplerze
-                poppler_path = r"C:\poppler-24.08.0\Library\bin"
-            else:
-                # Na serwerze (Linux) poppler jest w systemie (dzięki packages.txt)
-                poppler_path = None
+        # --- FIX: Automatyczne wykrywanie Popplera ---
+        if platform.system() == "Windows":
+            # Twoja lokalna ścieżka (upewnij się że folder istnieje!)
+            poppler_path = r"C:\poppler\Library\bin"
+        else:
+            # Na Linux (Streamlit Cloud) - None (systemowy)
+            poppler_path = None
 
-            # Konwersja PDF na obraz (pierwsza strona)
-            # file_bytes.read() czyta plik, więc potem trzeba zrobić seek(0) jeśli chcemy go użyć ponownie
+        if mime_type == 'application/pdf':
+            # Czytamy bajty
             pdf_content = file_bytes.read()
-            file_bytes.seek(0) # Reset pointera dla reszty programu
+            file_bytes.seek(0) # Reset pointera
             
+            # Konwersja PDF -> Obraz
+            # TA LINIA POWODOWAŁA BŁĄD, BO BYŁA POZA FUNKCJĄ:
             images = convert_from_bytes(pdf_content, poppler_path=poppler_path)
             
             if images:
-                image_part = images[0] # Bierzemy 1. stronę do analizy
+                image_part = images[0]
                 response = model.generate_content([prompt, image_part])
             else:
                 return None
         else:
-            # Obraz (JPG/PNG) - wysyłamy bezpośrednio
+            # Obraz
             image_part = Image.open(file_bytes)
             response = model.generate_content([prompt, image_part])
             
-        # Parsowanie JSONa z odpowiedzi (usuwanie ewentualnych znaczników Markdown)
-        text = response.text.strip()
-        # Czasami AI zwraca ```json { ... } ```, musimy to wyczyścić
-        if text.startswith("```json"):
-            text = text.replace("```json", "").replace("```", "")
-        elif text.startswith("```"):
-             text = text.replace("```", "")
-             
-        return json.loads(text.strip())
+        # Parsowanie JSON
+        text = response.text.replace("```json", "").replace("```", "").strip()
+        result_json = json.loads(text)
+        
+        # --- WALIDACJA LOGICZNA (wymaga funkcji pomocniczych poniżej) ---
+        if result_json.get('typ') == 'LSTB':
+            result_json = validate_lstb_data(result_json)
+            
+        return result_json
         
     except Exception as e:
         st.error(f"Błąd AI: {e}")
         return None
+
+# --- FUNKCJE POMOCNICZE DO WALIDACJI ---
+def parse_german_money(s):
+    if not s: return 0.0
+    s = str(s).strip()
+    s = re.sub(r'[^\d,\.-]', '', s)
+    if not s: return 0.0
+    if ',' in s:
+        s = s.replace('.', '').replace(',', '.')
+    elif '.' in s:
+        parts = s.split('.')
+        if len(parts) > 1: s = s.replace('.', '')
+    try: return float(s)
+    except: return 0.0
+
+def validate_lstb_data(data):
+    dane = data.get('dane', {})
+    numeric_fields = ['brutto', 'podatek', 'doplata', 'koscielny']
+    for key in numeric_fields:
+        if key in dane:
+            val_float = parse_german_money(dane[key])
+            if key == 'podatek' and val_float > parse_german_money(dane.get('brutto', 0)):
+                val_float /= 100.0
+            dane[key] = "{:.2f}".format(val_float).replace('.', ',')
+    data['dane'] = dane
+    return data
 # Inicjalizacja managera ciasteczek
 cookies = EncryptedCookieManager(
     prefix="my_prefix",  # Zmień prefix na unikalny dla swojej aplikacji
@@ -627,7 +690,9 @@ def edytuj_usluge():
                                     # Przykład (do dopasowania do Twojej funkcji add_service/update):
                                     # sheet2.update_cell(service_index + 2, KOLUMNA_BRUTTO_1, val_brutto)
                                     st.info("Tutaj nastąpi aktualizacja Excela (kod trzeba dopasować do indeksów kolumn).")
-                                    
+                                    sheet2.update_cell(service_index + 2, 31, val_brutto) # Kolumna 31 to np. Brutto1
+                                    sheet2.update_cell(service_index + 2, 32, val_tax)    # Kolumna 32 to np. Podatek1
+                                    st.success("Dane zaktualizowane w Excelu!")
                                     # UWAGA: Aby to zadziałało, musisz tu wywołać logicznie sheet2.update() 
                                     # używając service_index (który mamy z góry funkcji)
                                     # Np:
